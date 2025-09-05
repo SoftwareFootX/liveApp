@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Pose } from "@mediapipe/pose";
+import { Pose, type Landmark } from "@mediapipe/pose";
 import { Camera } from "@mediapipe/camera_utils";
 import { BiVideoRecording } from "react-icons/bi";
 import { FaRegStopCircle } from "react-icons/fa";
@@ -38,7 +38,7 @@ const MediaPipe = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [costado, setCostado] = useState<"izq" | "der">("izq");
   const [modo, setModo] = useState<
-    "bicicleta" | "caminar" | "postura" | "inferior"
+    "bicicleta" | "caminar" | "postura" | "inferior" | "sagital" | "frontal"
   >("postura");
   const [facingMode, setFacingMode] = useState<"user" | "environment">(
     "environment"
@@ -70,6 +70,7 @@ const MediaPipe = () => {
   useEffect(() => {
     costadoRef.current = costado;
   }, [costado]);
+
   const calculateAngle = (
     a: { x: number; y: number },
     b: { x: number; y: number },
@@ -85,6 +86,31 @@ const MediaPipe = () => {
     return Math.abs(180 - angleDeg); // <-- invierte la escala
   };
 
+  function calculatePelvis(
+    leftHip: Landmark,
+    rightHip: Landmark,
+    canvasWidth: number,
+    canvasHeight: number
+  ): number {
+    // Pasar coords normalizadas a píxeles
+    const lx = leftHip.x * canvasWidth;
+    const ly = leftHip.y * canvasHeight;
+    const rx = rightHip.x * canvasWidth;
+    const ry = rightHip.y * canvasHeight;
+
+    // Diferencias
+    const dx = rx - lx; // distancia horizontal entre caderas
+    const dy = ry - ly; // diferencia vertical (positivo si derecha está más abajo)
+
+    // Ángulo de la línea de caderas respecto a la horizontal
+    const angleRad = Math.atan2(dy, dx);
+    const angleDeg = angleRad * (180 / Math.PI);
+
+    // Queremos inclinación respecto a la horizontal → ya está centrada en 0
+    // Si derecha más baja que izquierda → angleDeg positivo
+    return angleDeg * -1;
+  }
+
   useEffect(() => {
     const pose = new Pose({
       locateFile: (file) =>
@@ -95,7 +121,7 @@ const MediaPipe = () => {
       modelComplexity: 1,
       smoothLandmarks: true,
       enableSegmentation: false,
-      minDetectionConfidence: 0.6,
+      minDetectionConfidence: 0.8,
       minTrackingConfidence: 0.6,
     });
 
@@ -125,9 +151,7 @@ const MediaPipe = () => {
           for (let i = 0; i < ids.length - 1; i++) {
             lines.push([ids[i], ids[i + 1]]);
           }
-        }
-
-        if (modo === "caminar") {
+        } else if (modo === "caminar") {
           ids =
             costadoRef.current === "der"
               ? [32, 28, 26, 24, 12]
@@ -135,9 +159,7 @@ const MediaPipe = () => {
           for (let i = 0; i < ids.length - 1; i++) {
             lines.push([ids[i], ids[i + 1]]);
           }
-        }
-
-        if (modo === "inferior") {
+        } else if (modo === "inferior") {
           ids =
             costadoRef.current === "der"
               ? [24, 26, 28] // cadera, rodilla, tobillo derecho
@@ -145,24 +167,35 @@ const MediaPipe = () => {
           for (let i = 0; i < ids.length - 1; i++) {
             lines.push([ids[i], ids[i + 1]]);
           }
-        }
+        } else if (modo === "postura") {
+          ids = [11, 12, 23, 24, 13, 14, 15, 16, 25, 26, 27, 28, 29, 30];
 
-        if (modo === "postura") {
-          ids = [11, 12, 23, 24, 13, 14, 15, 16, 25, 26, 31, 32];
           lines = [
-            [11, 12],
-            [23, 24],
-            [11, 23],
-            [12, 24],
-            [11, 13],
-            [13, 15],
-            [12, 14],
-            [14, 16],
-            [23, 25],
-            [25, 31],
-            [24, 26],
-            [26, 32],
+            [11, 12], // hombros
+            [23, 24], // caderas
+            [11, 23], // hombro izq → cadera izq
+            [12, 24], // hombro der → cadera der
+            [11, 13], // brazo izq
+            [13, 15], // codo izq → muñeca izq
+            [12, 14], // brazo der
+            [14, 16], // codo der → muñeca der
+            [23, 25], // pierna izq
+            [25, 27], // rodilla izq → tobillo izq
+            [27, 29], // tobillo izq → talón izq ✅
+            [24, 26], // pierna der
+            [26, 28], // rodilla der → tobillo der
+            [28, 30], // tobillo der → talón der ✅
           ];
+        } else if (modo === "sagital") {
+          ids = costadoRef.current === "der" ? [28, 30, 32] : [27, 29, 31];
+          for (let i = 0; i < ids.length - 1; i++) {
+            lines.push([ids[i], ids[i + 1]]);
+          }
+        } else if (modo === "frontal") {
+          ids = costadoRef.current === "der" ? [26, 28, 30] : [25, 27, 29];
+          for (let i = 0; i < ids.length - 1; i++) {
+            lines.push([ids[i], ids[i + 1]]);
+          }
         }
 
         ctx.strokeStyle = "cyan";
@@ -192,6 +225,38 @@ const MediaPipe = () => {
           ctx.lineTo(bx, by);
           ctx.stroke();
 
+          if (modo === "frontal") {
+            const ids =
+              costadoRef.current === "der" ? [26, 28, 30] : [25, 27, 29];
+
+            for (let i = 1; i < ids.length - 1; i++) {
+              const prev = lm[ids[i - 1]];
+              const mid = lm[ids[i]];
+              const next = lm[ids[i + 1]];
+              const x = mid.x * canvas.width;
+              const y = mid.y * canvas.height;
+              const angle = Math.round(calculateAngle(prev, mid, next));
+              ctx.fillStyle = "yellow";
+              ctx.fillText(`${angle}º`, x + 5, y - 5);
+            }
+          }
+
+          if (modo === "sagital") {
+            const ids =
+              costadoRef.current === "der" ? [28, 30, 32] : [27, 29, 31];
+
+            for (let i = 1; i < ids.length - 1; i++) {
+              const prev = lm[ids[i - 1]];
+              const mid = lm[ids[i]];
+              const next = lm[ids[i + 1]];
+              const x = mid.x * canvas.width;
+              const y = mid.y * canvas.height;
+              const angle = Math.round(calculateAngle(prev, mid, next));
+              ctx.fillStyle = "yellow";
+              ctx.fillText(`${angle}º`, x + 5, y - 5);
+            }
+          }
+          // POSTURA
           if (modo === "postura") {
             const angulosPostura: [number, number, number][] = [
               [23, 11, 13], // Hombro derecho
@@ -199,10 +264,39 @@ const MediaPipe = () => {
               [24, 12, 14], // Hombro izquierdo
               [12, 14, 16], // Codo izquierdo
               [12, 24, 26], // Cadera derecha
-              [24, 26, 28], // Rodilla derecha
+              [24, 26, 32], // Rodilla derecha
               [11, 23, 25], // Cadera izquierda
-              [23, 25, 27], // Rodilla izquierda
+              [23, 25, 31], // Rodilla izquierda
             ];
+
+            const leftHip = lm[23];
+            const rightHip = lm[24];
+
+            const pelvisAngleDer = calculatePelvis(
+              leftHip,
+              rightHip,
+              canvas.width,
+              canvas.height
+            );
+
+            const pelvisAngleizq = pelvisAngleDer * -1;
+
+            // Mostrar el ángulo cerca de la cadera izquierda
+            const lx = leftHip.x * canvas.width;
+            const ly = leftHip.y * canvas.height;
+
+            ctx.fillStyle = "cyan";
+            ctx.fillText(
+              `Pelvis: ${pelvisAngleDer.toFixed(1)}º`,
+              lx + 10,
+              ly - 10
+            );
+
+            ctx.fillText(
+              `Pelvis: ${pelvisAngleizq.toFixed(1)}º`,
+              lx + 50,
+              ly - 50
+            );
 
             angulosPostura.forEach(([a, b, c]) => {
               const pa = lm[a];
@@ -216,7 +310,9 @@ const MediaPipe = () => {
               ctx.fillStyle = "yellow";
               ctx.fillText(`${angle}º`, bx + 5, by - 5);
             });
-          } // BICICLETA
+          }
+
+          // BICICLETA
           if (modo === "bicicleta") {
             const ids =
               costadoRef.current === "der"
@@ -254,6 +350,7 @@ const MediaPipe = () => {
             }
           }
 
+          // INFERIOR
           if (modo === "inferior") {
             const ids =
               costadoRef.current === "der"
@@ -522,12 +619,21 @@ const MediaPipe = () => {
           </div>
         )}
 
-        <div className="flex justify-center gap-3 mb-4">
-          {(["bicicleta", "caminar", "postura", "inferior"] as const).map(
-            (m) => (
+        <div className="mb-4 overflow-x-auto sm:overflow-visible">
+          <div className="flex sm:justify-center gap-3 px-2 flex-nowrap">
+            {(
+              [
+                "bicicleta",
+                "caminar",
+                "postura",
+                "inferior",
+                "frontal",
+                "sagital",
+              ] as const
+            ).map((m) => (
               <button
                 key={m}
-                className={`px-4 py-1 rounded-full capitalize ${
+                className={`px-4 py-1 rounded-full capitalize whitespace-nowrap ${
                   modo === m ? "bg-blue-500 text-white" : "bg-gray-200"
                 }`}
                 onClick={() => setModo(m)}
@@ -538,10 +644,14 @@ const MediaPipe = () => {
                   ? "🏃 Cinta"
                   : m === "postura"
                   ? "🚶 Postura"
-                  : "🦵🏼 Inferior"}
+                  : m === "inferior"
+                  ? "🦵🏼 Inferior"
+                  : m === "frontal"
+                  ? "🧍🏻‍♂️ Frontal"
+                  : "🦶🏼 Sagital"}
               </button>
-            )
-          )}
+            ))}
+          </div>
         </div>
 
         {/* Video + Canvas */}

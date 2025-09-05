@@ -35,7 +35,7 @@ const OpenCV: React.FC = () => {
     const startCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 640, height: 480 },
+          video: { width: 320, height: 240 },
         });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -45,7 +45,7 @@ const OpenCV: React.FC = () => {
           };
         }
       } catch (e) {
-        console.error("❌ Error accediendo a la cámara", e);
+        console.error("\u274C Error accediendo a la c\u00e1mara", e);
       }
     };
 
@@ -84,11 +84,35 @@ const OpenCV: React.FC = () => {
     }
   };
 
+  const createCvMatFromPoints = (points: { x: number; y: number }[]) => {
+    const mat = new window.cv.Mat(points.length, 1, window.cv.CV_32FC2);
+    points.forEach((pt, i) => {
+      mat.data32F[i * 2] = pt.x;
+      mat.data32F[i * 2 + 1] = pt.y;
+    });
+    return mat;
+  };
+
+  const getROIFromPoints = (
+    points: { x: number; y: number }[],
+    padding = 40,
+    frameWidth = 320,
+    frameHeight = 240
+  ) => {
+    const xs = points.map((p) => p.x);
+    const ys = points.map((p) => p.y);
+    const minX = Math.max(Math.min(...xs) - padding, 0);
+    const minY = Math.max(Math.min(...ys) - padding, 0);
+    const maxX = Math.min(Math.max(...xs) + padding, frameWidth);
+    const maxY = Math.min(Math.max(...ys) + padding, frameHeight);
+    return new window.cv.Rect(minX, minY, maxX - minX, maxY - minY);
+  };
+
   useEffect(() => {
     if (!cvReady || !streaming || !trackingEnabled) return;
 
     const cap = new window.cv.VideoCapture(videoRef.current);
-    const frame = new window.cv.Mat(480, 640, window.cv.CV_8UC4);
+    const frame = new window.cv.Mat(240, 320, window.cv.CV_8UC4);
     const currGray = new window.cv.Mat();
     const nextPoints = new window.cv.Mat();
     const status = new window.cv.Mat();
@@ -96,6 +120,13 @@ const OpenCV: React.FC = () => {
 
     const winSize = new window.cv.Size(31, 31);
     const maxLevel = 3;
+    const criteria = new window.cv.TermCriteria(
+      window.cv.TERM_CRITERIA_EPS | window.cv.TERM_CRITERIA_COUNT,
+      30,
+      0.01
+    );
+    let lostCount = 0;
+    const maxLostFrames = 3;
 
     const track = () => {
       cap.read(frame);
@@ -103,44 +134,71 @@ const OpenCV: React.FC = () => {
       window.cv.GaussianBlur(currGray, currGray, new window.cv.Size(5, 5), 1.5);
 
       if (prevPoints.current && prevGray.current) {
+        const prevPts = prevPoints.current;
+        const pts = [];
+        for (let i = 0; i < prevPts.rows; i++) {
+          pts.push({
+            x: prevPts.data32F[i * 2],
+            y: prevPts.data32F[i * 2 + 1],
+          });
+        }
+
+        const roi = getROIFromPoints(pts);
+        const prevROI = prevGray.current.roi(roi);
+        const currROI = currGray.roi(roi);
+
+        const prevPtsROI = new window.cv.Mat(
+          prevPts.rows,
+          1,
+          window.cv.CV_32FC2
+        );
+        for (let i = 0; i < pts.length; i++) {
+          prevPtsROI.data32F[i * 2] = pts[i].x - roi.x;
+          prevPtsROI.data32F[i * 2 + 1] = pts[i].y - roi.y;
+        }
+
         window.cv.calcOpticalFlowPyrLK(
-          prevGray.current,
-          currGray,
-          prevPoints.current,
+          prevROI,
+          currROI,
+          prevPtsROI,
           nextPoints,
           status,
           err,
           winSize,
-          maxLevel
+          maxLevel,
+          criteria,
+          0,
+          0.001
         );
 
-        const newPoints: { x: number; y: number }[] = [];
-
+        const goodPoints: { x: number; y: number }[] = [];
         for (let i = 0; i < status.rows; i++) {
           if (status.data[i] === 1 && err.data32F[i] < 20) {
-            const x = nextPoints.data32F[i * 2];
-            const y = nextPoints.data32F[i * 2 + 1];
-            newPoints.push({ x, y });
+            const x = nextPoints.data32F[i * 2] + roi.x;
+            const y = nextPoints.data32F[i * 2 + 1] + roi.y;
+            goodPoints.push({ x, y });
           }
         }
 
-        if (newPoints.length === prevPoints.current.rows) {
-          drawOverlay(newPoints);
-
+        if (goodPoints.length === prevPts.rows) {
+          drawOverlay(goodPoints);
+          lostCount = 0;
           prevPoints.current.delete();
-          prevPoints.current = new window.cv.Mat(
-            newPoints.length,
-            1,
-            window.cv.CV_32FC2
-          );
-          newPoints.forEach((pt, i) => {
-            prevPoints.current.data32F[i * 2] = pt.x;
-            prevPoints.current.data32F[i * 2 + 1] = pt.y;
-          });
+          prevPoints.current = createCvMatFromPoints(goodPoints);
         } else {
-          console.log("⚠️ Tracking perdido por error alto o falta de puntos.");
-          setTrackingEnabled(false);
+          lostCount++;
+          console.warn(
+            `\u26A0\uFE0F Tracking impreciso (${lostCount}/${maxLostFrames})`
+          );
+          if (lostCount >= maxLostFrames) {
+            console.log("\u274C Tracking perdido.");
+            setTrackingEnabled(false);
+          }
         }
+
+        prevROI.delete();
+        currROI.delete();
+        prevPtsROI.delete();
       }
 
       currGray.copyTo(prevGray.current);
@@ -175,18 +233,13 @@ const OpenCV: React.FC = () => {
 
     if (clickPoints.current.length === 2) {
       if (prevPoints.current) prevPoints.current.delete();
-      prevPoints.current = new window.cv.Mat(2, 1, window.cv.CV_32FC2);
-
-      clickPoints.current.forEach((pt, i) => {
-        prevPoints.current.data32F[i * 2] = pt.x;
-        prevPoints.current.data32F[i * 2 + 1] = pt.y;
-      });
+      prevPoints.current = createCvMatFromPoints(clickPoints.current);
 
       if (prevGray.current) prevGray.current.delete();
       prevGray.current = new window.cv.Mat();
 
       const cap = new window.cv.VideoCapture(videoRef.current);
-      const frame = new window.cv.Mat(480, 640, window.cv.CV_8UC4);
+      const frame = new window.cv.Mat(240, 320, window.cv.CV_8UC4);
       cap.read(frame);
       window.cv.cvtColor(frame, prevGray.current, window.cv.COLOR_RGBA2GRAY);
       window.cv.GaussianBlur(
@@ -203,7 +256,13 @@ const OpenCV: React.FC = () => {
 
   return (
     <div
-      style={{ position: "relative", width: 640, height: 520, margin: "auto" }}
+      style={{
+        position: "relative",
+        width: 640,
+        height: 300,
+        margin: "auto",
+        top: 30,
+      }}
       onClick={handleClick}
       className="bg-white rounded-lg shadow-md border border-gray-300 p-4"
     >
@@ -215,28 +274,29 @@ const OpenCV: React.FC = () => {
           ← Atrás
         </Link>
       </div>
+      <div className=" flex items-center justify-center relative">
+        <video
+          ref={videoRef}
+          width={320}
+          height={240}
+          className="rounded-md"
+          muted
+          playsInline
+          autoPlay
+        />
 
-      <video
-        ref={videoRef}
-        width={640}
-        height={480}
-        className="rounded-md"
-        muted
-        playsInline
-        autoPlay
-      />
-
-      <canvas
-        ref={canvasRef}
-        width={640}
-        height={480}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          pointerEvents: "none",
-        }}
-      />
+        <canvas
+          ref={canvasRef}
+          width={320}
+          height={240}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 143,
+            pointerEvents: "none",
+          }}
+        />
+      </div>
 
       <p className="text-center text-gray-600 text-sm mt-3">
         Haz clic en dos puntos del cuerpo para seguirlos (ej: tobillo, rodilla).

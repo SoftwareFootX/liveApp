@@ -7,4 +7,5 @@ export type Tab =
   | "stop"
   | "body"
   | "left"
+  | "reset"
   | "right";

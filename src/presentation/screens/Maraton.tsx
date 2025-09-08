@@ -39,7 +39,15 @@ const Maraton = () => {
   const [caderaDer, setCaderaDer] = useState<{ time: number; angle: number }[]>(
     []
   );
-  const [torax, setTorax] = useState<{ time: number; angle: number }[]>([]);
+  const [toraxDer, setToraxDer] = useState<{ time: number; angle: number }[]>(
+    []
+  );
+  const [toraxIzq, setToraxIzq] = useState<{ time: number; angle: number }[]>(
+    []
+  );
+
+  const [selected, setSelected] = useState<Tab>("home");
+
   const [isRunning, setIsRunning] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [config, setConfig] = useState({
@@ -49,7 +57,7 @@ const Maraton = () => {
     minDetectionConfidence: 0.8,
     minTrackingConfidence: 0.6,
     open: false,
-    sizeVideo: 500,
+    sizeVideo: 200,
     record: false,
   });
 
@@ -74,22 +82,18 @@ const Maraton = () => {
     }
   };
 
-  // const reiniciar = () => {
-  //   detener();
-  //   setSegundos(0);
-  // };
-
   const handlePlay = () => {
     setCaderaIzq([]);
     setCaderaDer([]);
-    setTorax([]);
+    setToraxIzq([]);
+    setToraxDer([]);
     setStartTime(Date.now());
     setIsRunning(true);
     iniciar();
-    setTimeout(() => {
-      setIsRunning(false);
-      handleStop();
-    }, 8000);
+    // setTimeout(() => {
+    //   setIsRunning(false);
+    //   handleStop();
+    // }, 8000);
   };
 
   const handleStop = () => {
@@ -166,7 +170,7 @@ const Maraton = () => {
   };
 
   const lastAnglesRef = useRef<{ der: number; izq: number } | null>(null);
-  const lastInclinacion = useRef<{ torax: number } | null>(null);
+  const lastInclinacion = useRef<{ der: number; izq: number } | null>(null);
 
   useEffect(() => {
     const pose = new Pose({
@@ -351,15 +355,20 @@ const Maraton = () => {
             canvas.height
           );
 
-          const inclinacionDeToraX = calculateTorsoTilt(
+          const inclinacionDeToraXDer = calculateTorsoTilt(
             hombroIzq,
             hombroDer,
             canvas.width,
             canvas.height
           );
 
-          lastInclinacion.current = { torax: inclinacionDeToraX };
           const pelvisAngleIzq = pelvisAngleDer * -1;
+          const toraxAngleIzq = inclinacionDeToraXDer * -1;
+
+          lastInclinacion.current = {
+            der: inclinacionDeToraXDer,
+            izq: toraxAngleIzq,
+          };
           lastAnglesRef.current = { der: pelvisAngleDer, izq: pelvisAngleIzq };
 
           const currentTime = Date.now();
@@ -367,17 +376,21 @@ const Maraton = () => {
             ? Math.round((currentTime - startTime) / 1000)
             : 0;
 
-          setTorax((prev) => [
+          setToraxDer((prev) => [
             ...prev,
-            { time: timeSec, angle: inclinacionDeToraX },
+            { time: timeSec, angle: inclinacionDeToraXDer },
+          ]);
+          setToraxIzq((prev) => [
+            ...prev,
+            { time: timeSec, angle: toraxAngleIzq },
           ]);
           setCaderaIzq((prev) => [
             ...prev,
-            { time: timeSec, angle: pelvisAngleDer },
+            { time: timeSec, angle: pelvisAngleIzq },
           ]);
           setCaderaDer((prev) => [
             ...prev,
-            { time: timeSec, angle: pelvisAngleIzq },
+            { time: timeSec, angle: pelvisAngleDer },
           ]);
 
           // --- Dibujar sobre canvas ---
@@ -395,8 +408,13 @@ const Maraton = () => {
 
           ctx.fillStyle = "cyan";
           ctx.fillText(
-            `Torax: ${inclinacionDeToraX.toFixed(1)}º`,
-            lxTorax + 10,
+            `Torax Der: ${inclinacionDeToraXDer.toFixed(1)}º`,
+            lxTorax + 60,
+            lyTorax - 10
+          );
+          ctx.fillText(
+            `Torax Iqz: ${toraxAngleIzq.toFixed(1)}º`,
+            lxTorax - 60,
             lyTorax - 10
           );
           ctx.fillText(
@@ -432,12 +450,7 @@ const Maraton = () => {
       pose.close();
       camera?.stop();
     };
-  }, [
-    isRunning,
-    side,
-    config.open,
-    // facingMode,
-  ]);
+  }, [isRunning, side, config.open]);
 
   // --- resto del código (captura, grabar, etc.) igual ---
   // const handleCapture = () => {
@@ -482,7 +495,13 @@ const Maraton = () => {
   //   }
   // };
 
-  const [selected, setSelected] = useState<Tab>("home");
+  const restart = () => {
+    setCaderaIzq([]);
+    setCaderaDer([]);
+    setToraxIzq([]);
+    setToraxDer([]);
+    setSegundos(0);
+  };
 
   useEffect(() => {
     switch (selected) {
@@ -504,31 +523,15 @@ const Maraton = () => {
       case "body":
         setSide("both");
         return;
+      case "reset":
+        restart();
+        return;
 
       default:
         setConfig((prev) => ({ ...prev, open: false }));
         return;
     }
   }, [selected, side]);
-
-  const caderaIzq2 = [
-    { time: 1, angle: 25 },
-    { time: 2, angle: 28 },
-    { time: 3, angle: 32 },
-    { time: 4, angle: 30 },
-    { time: 5, angle: 35 },
-    { time: 6, angle: 27 },
-    { time: 7, angle: 31 },
-    { time: 8, angle: 29 },
-    { time: 9, angle: 33 },
-    { time: 10, angle: 36 },
-    { time: 11, angle: 34 },
-    { time: 12, angle: 30 },
-    { time: 13, angle: 32 },
-    { time: 14, angle: 28 },
-    { time: 15, angle: 31 },
-    { time: 16, angle: 35 },
-  ];
 
   return (
     <div className="w-screen h-screen flex bg-terciary">
@@ -566,7 +569,7 @@ const Maraton = () => {
 
                   <CartesianGrid
                     stroke="white" // color de las líneas
-                    strokeOpacity={0.2} // opacidad baja
+                    strokeOpacity={0.1} // opacidad baja
                     horizontal={true} // solo horizontales
                     vertical={false} // sin líneas verticales
                   />
@@ -574,11 +577,11 @@ const Maraton = () => {
                   <YAxis
                     tickCount={
                       Math.floor(
-                        Math.max(...caderaIzq2.map((d) => d.angle)) / 5
+                        Math.max(...caderaIzq.map((d) => Number(d.angle))) / 5
                       ) + 1
-                    } // número de ticks
+                    }
                     interval={0} // mostrar todos los ticks calculados
-                    tickFormatter={(value) => value.toString()} // formato de tick
+                    tickFormatter={(value) => value.toFixed(1)} // muestra 0.0, 0.5, etc.
                     domain={[0, "dataMax"]} // inicio en 0 hasta el máximo de tus datos
                   />
 
@@ -614,9 +617,9 @@ const Maraton = () => {
             {/* Header */}
             <div className="flex justify-between items-start mb-2">
               <div>
-                <div className="text-sm text-gray-400">Cadera derecha</div>
+                <div className="text-sm text-gray-400">Torax Izquierdo</div>
                 <div className="text-xs text-gray-500">
-                  Con respecto a cadera izquierda
+                  Con respecto a torax derecho
                 </div>
               </div>
               <div className="text-2xl font-bold">{segundos} s</div>
@@ -625,13 +628,32 @@ const Maraton = () => {
             {/* Chart */}
             <div className="w-full h-3/4">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={caderaDer}>
+                <AreaChart data={toraxIzq}>
                   <defs>
                     <linearGradient id="colorHip" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#ff7f00" stopOpacity={0.8} />
                       <stop offset="95%" stopColor="#ff7f00" stopOpacity={0} />
                     </linearGradient>
                   </defs>
+
+                  <CartesianGrid
+                    stroke="white" // color de las líneas
+                    strokeOpacity={0.2} // opacidad baja
+                    horizontal={true} // solo horizontales
+                    vertical={false} // sin líneas verticales
+                  />
+
+                  <YAxis
+                    tickCount={
+                      Math.floor(
+                        Math.max(...toraxIzq.map((d) => Number(d.angle))) / 5
+                      ) + 1
+                    }
+                    interval={0} // mostrar todos los ticks calculados
+                    tickFormatter={(value) => value.toFixed(1)} // muestra 0.0, 0.5, etc.
+                    domain={[0, "dataMax"]} // inicio en 0 hasta el máximo de tus datos
+                  />
+
                   <Area
                     type="monotone"
                     dataKey="angle"
@@ -639,7 +661,7 @@ const Maraton = () => {
                     strokeWidth={2}
                     fill="url(#colorHip)"
                   />
-                  {/* Opcional: tooltip */}
+
                   <Tooltip
                     contentStyle={{ backgroundColor: "#000", border: "none" }}
                   />
@@ -663,7 +685,9 @@ const Maraton = () => {
 
         {/* Columna 2: Video + Canvas */}
         <div className="flex justify-center items-center">
-          <div className="relative max-w-[400px]overflow-hidden shadow-md bg-black">
+          <div
+            className={`relative max-w-[500px] overflow-hidden shadow-md bg-black`}
+          >
             <video ref={videoRef} autoPlay playsInline muted />
             <canvas
               ref={canvasRef}
@@ -678,9 +702,9 @@ const Maraton = () => {
             {/* Header */}
             <div className="flex justify-between items-start mb-2">
               <div>
-                <div className="text-sm text-gray-400">Torax</div>
+                <div className="text-sm text-gray-400">Cadera derecha</div>
                 <div className="text-xs text-gray-500">
-                  Con respecto a punto medio
+                  Con respecto a cadera izquierda
                 </div>
               </div>
               <div className="text-2xl font-bold">{segundos} s</div>
@@ -689,7 +713,7 @@ const Maraton = () => {
             {/* Chart */}
             <div className="w-full h-3/4">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={torax}>
+                <AreaChart data={caderaDer}>
                   <defs>
                     <linearGradient id="colorHip" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#ff7f00" stopOpacity={0.8} />
@@ -706,10 +730,12 @@ const Maraton = () => {
 
                   <YAxis
                     tickCount={
-                      Math.floor(Math.max(...torax.map((d) => d.angle)) / 5) + 1
-                    } // número de ticks
+                      Math.floor(
+                        Math.max(...caderaDer.map((d) => Number(d.angle))) / 5
+                      ) + 1
+                    }
                     interval={0} // mostrar todos los ticks calculados
-                    tickFormatter={(value) => value.toString()} // formato de tick
+                    tickFormatter={(value) => value.toFixed(1)} // muestra 0.0, 0.5, etc.
                     domain={[0, "dataMax"]} // inicio en 0 hasta el máximo de tus datos
                   />
 
@@ -745,9 +771,9 @@ const Maraton = () => {
             {/* Header */}
             <div className="flex justify-between items-start mb-2">
               <div>
-                <div className="text-sm text-gray-400">Cadera Izquierda</div>
+                <div className="text-sm text-gray-400">Torax derecho</div>
                 <div className="text-xs text-gray-500">
-                  Con respecto a cadera derecha
+                  Con respecto a torax izquierdo
                 </div>
               </div>
               <div className="text-2xl font-bold">{segundos} s</div>
@@ -756,7 +782,7 @@ const Maraton = () => {
             {/* Chart */}
             <div className="w-full h-3/4">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={caderaIzq}>
+                <AreaChart data={toraxDer}>
                   <defs>
                     <linearGradient id="colorHip" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#ff7f00" stopOpacity={0.8} />
@@ -774,11 +800,11 @@ const Maraton = () => {
                   <YAxis
                     tickCount={
                       Math.floor(
-                        Math.max(...caderaIzq2.map((d) => d.angle)) / 5
+                        Math.max(...toraxDer.map((d) => Number(d.angle))) / 5
                       ) + 1
-                    } // número de ticks
+                    }
                     interval={0} // mostrar todos los ticks calculados
-                    tickFormatter={(value) => value.toString()} // formato de tick
+                    tickFormatter={(value) => value.toFixed(1)} // muestra 0.0, 0.5, etc.
                     domain={[0, "dataMax"]} // inicio en 0 hasta el máximo de tus datos
                   />
 

@@ -5,6 +5,7 @@ import { SiGoogleanalytics } from "react-icons/si";
 import { FiTool } from "react-icons/fi";
 import { FaPlay, FaStop } from "react-icons/fa";
 import { IoBody, IoHandLeft, IoHandRight } from "react-icons/io5";
+import { RiResetRightFill } from "react-icons/ri";
 
 import type { Tab } from "../types/types";
 
@@ -15,6 +16,7 @@ const tabs: { key: Tab; icon: ReactNode; size?: number }[] = [
   { key: "config", icon: <FiTool size={27} /> },
   { key: "play", icon: <FaPlay size={25} /> },
   { key: "stop", icon: <FaStop size={25} /> },
+  { key: "reset", icon: <RiResetRightFill size={25} /> },
   { key: "body", icon: <IoBody size={25} /> },
   { key: "left", icon: <IoHandLeft size={25} /> },
   { key: "right", icon: <IoHandRight size={25} /> },

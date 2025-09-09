@@ -79,10 +79,10 @@ const Maraton = () => {
     setStartTime(Date.now());
     setIsRunning(true);
     iniciar();
-    setTimeout(() => {
-      setIsRunning(false);
-      handleStop();
-    }, 6000);
+    // setTimeout(() => {
+    //   setIsRunning(false);
+    //   handleStop();
+    // }, 6000);
   };
 
   const handleStop = () => {

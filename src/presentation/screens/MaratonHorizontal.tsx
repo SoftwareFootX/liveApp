@@ -15,7 +15,7 @@ import { ModalConfig } from "../../components/ModalConfig";
 import { SideBar } from "../../components/SideBar";
 import type { Tab } from "../../types/types";
 
-const Maraton = () => {
+const MaratonHorizontal = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -151,7 +151,7 @@ const Maraton = () => {
     // Ajuste según vista (frente / espalda)
     angleDeg = facingFront ? angleDeg : -angleDeg;
 
-    return angleDeg;
+    return -angleDeg;
   };
 
   const lastAnglesRef = useRef<{ der: number; izq: number } | null>(null);
@@ -599,11 +599,11 @@ const Maraton = () => {
             </div>
           </div>
         </div>
+        {/* Normal */}
 
         {/* Columna 2: Video + Canvas */}
-        <div className="flex justify-center items-center relative">
-          {/* Contenedor central */}
-          <div className="h-screen w-full relative overflow-hidden bg-black z-5 flex justify-center items-center">
+        {/* <div className="flex justify-center items-center relative">
+          <div className="h-screen w-full relative overflow-hidden bg-black z-5 flex justify-center items-center ">
             <video
               ref={videoRef}
               autoPlay
@@ -614,6 +614,24 @@ const Maraton = () => {
             <canvas
               ref={canvasRef}
               className="absolute top-0 left-1/2 -translate-x-1/2 h-screen w-auto z-10 pointer-events-none"
+            />
+          </div>
+        </div> */}
+        {/* Rotado */}
+
+        {/* Columna 2: Video + Canvas */}
+        <div className="flex justify-center items-center relative">
+          <div className="h-screen w-full relative overflow-hidden bg-black flex justify-center items-center">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="h-screen w-auto object-cover"
+            />
+            <canvas
+              ref={canvasRef}
+              className="absolute top-0 left-1/2 -translate-x-1/2 h-screen w-auto pointer-events-none object-cover"
             />
           </div>
         </div>
@@ -737,4 +755,4 @@ const Maraton = () => {
   );
 };
 
-export { Maraton };
+export { MaratonHorizontal };

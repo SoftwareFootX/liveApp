@@ -8,7 +8,8 @@ import { Mano } from "../screens/Mano";
 // import { TaskVision } from "../screens/TaskVision";
 // import { AutomaticAssignment } from "../screens/AutomaticAssignment";
 // import { OpenServer } from "../screens/OpenServer";
-import { Maraton } from "../screens/Maraton";
+import { MaratonHorizontal } from "../screens/MaratonHorizontal";
+import { MaratonVertical } from "../screens/MaratonVertical";
 
 const AppRoutes = () => {
   return (
@@ -23,7 +24,8 @@ const AppRoutes = () => {
         <Route path="/taskvision" element={<TaskVision />} />
         <Route path="/automaticassignment" element={<AutomaticAssignment />} />
         <Route path="/openserver" element={<OpenServer />} /> */}
-        <Route path="/maraton" element={<Maraton />} />
+        <Route path="/maratonh" element={<MaratonHorizontal />} />
+        <Route path="/maratonv" element={<MaratonVertical />} />
 
         {/* Rutas privada */}
 

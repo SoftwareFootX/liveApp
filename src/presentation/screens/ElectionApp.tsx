@@ -4,13 +4,14 @@ const ElectionApp = () => {
   return (
     <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center w-full max-w-4xl mx-auto h-screen gap-4 p-4 bg-gray-50 overflow-x-auto">
       {[
-        { to: "/mediapipe", icon: "🖐️", label: "MediaPipe" },
+        // { to: "/mediapipe", icon: "🖐️", label: "MediaPipe" },
         // { to: "/opencv", icon: "📷", label: "OpenCV" },
         // { to: "/opencvfromvideo", icon: "🎞️", label: "Open Video" },
-        { to: "/mano", icon: "✋", label: "Mano" },
+        // { to: "/mano", icon: "✋", label: "Mano" },
         // { to: "/automaticassignment", icon: "⚙️", label: "Auto" },
         // { to: "/openserver", icon: "⚙️", label: "OpenServer" },
-        { to: "/maraton", icon: "👟", label: "Maraton" },
+        { to: "/maratonv", icon: "👟", label: "Vertical" },
+        { to: "/maratonh", icon: "👟", label: "Horizontal" },
       ].map(({ to, icon, label }) => (
         <Link
           key={to}

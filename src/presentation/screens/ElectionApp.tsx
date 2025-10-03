@@ -12,6 +12,7 @@ const ElectionApp = () => {
         // { to: "/openserver", icon: "⚙️", label: "OpenServer" },
         { to: "/maratonv", icon: "👟", label: "Vertical" },
         { to: "/maratonh", icon: "👟", label: "Horizontal" },
+        { to: "/biomecanica", icon: "👟", label: "Biomecanica KinnX" },
       ].map(({ to, icon, label }) => (
         <Link
           key={to}

@@ -10,6 +10,7 @@ import { Mano } from "../screens/Mano";
 // import { OpenServer } from "../screens/OpenServer";
 import { MaratonHorizontal } from "../screens/MaratonHorizontal";
 import { MaratonVertical } from "../screens/MaratonVertical";
+import { Biomecanica } from "../screens/Biomecanica";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
         {/* Rutas pública */}
         <Route path="/election" element={<ElectionApp />} />
         <Route path="/mediapipe" element={<MediaPipe />} />
+        <Route path="/biomecanica" element={<Biomecanica />} />
         <Route path="/mano" element={<Mano />} />
         {/* <Route path="/opencv" element={<OpenCV />} />
         <Route path="/opencvfromvideo" element={<OpenCVFromVideo />} />

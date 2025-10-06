@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Pose } from "@mediapipe/pose";
 import { Camera } from "@mediapipe/camera_utils";
 
+import { ProtocoloCiclismo } from "../../components/ProtocoloCiclismo";
+
 // ------------------ Interfaces ------------------
 interface PosePoint {
   name: string; // ej: "left_wrist"
@@ -14,6 +16,7 @@ interface FrameData {
   image: string;
   points: PosePoint[];
   lines: [number, number][]; // <-- agregamos esto
+  angles: { name: string; value: number; points: [number, number, number] }[];
 }
 
 type Recording = FrameData[];
@@ -38,6 +41,56 @@ const Biomecanica = () => {
   const [modo, setModo] = useState<"bicicleta" | "caminar">("bicicleta");
   const [segundos, setSegundos] = useState(3);
   const [lado, setLado] = useState<"izq" | "der">("izq");
+  const [realtimeAngles, setRealtimeAngles] = useState<
+    { name: string; value: number; points: [number, number, number] }[]
+  >([]);
+
+  // ---------- Funcion para calcular angulos ----------
+  const getAngle = (
+    A: { x: number; y: number },
+    B: { x: number; y: number },
+    C: { x: number; y: number }
+  ) => {
+    const AB = { x: A.x - B.x, y: A.y - B.y };
+    const CB = { x: C.x - B.x, y: C.y - B.y };
+    const dot = AB.x * CB.x + AB.y * CB.y;
+    const magAB = Math.sqrt(AB.x ** 2 + AB.y ** 2);
+    const magCB = Math.sqrt(CB.x ** 2 + CB.y ** 2);
+    const angleRad = Math.acos(dot / (magAB * magCB));
+    return (angleRad * 180) / Math.PI;
+  };
+
+  const getAngleLandmarks = () => {
+    if (modo === "bicicleta") {
+      return lado === "der"
+        ? [
+            { name: "codo", points: [12, 14, 16] }, // hombro-codo-muñeca
+            { name: "cadera", points: [12, 24, 26] }, // hombro-cadera-rodilla
+            { name: "rodilla", points: [24, 26, 28] }, // cadera-rodilla-tobillo
+            { name: "tobillo", points: [26, 28, 32] }, // rodilla-tobillo-pie
+          ]
+        : [
+            { name: "codo", points: [11, 13, 15] },
+            { name: "cadera", points: [11, 23, 25] },
+            { name: "rodilla", points: [23, 25, 27] },
+            { name: "tobillo", points: [25, 27, 31] },
+          ];
+    } else {
+      return lado === "der"
+        ? [
+            { name: "cadera", points: [12, 24, 26] },
+            { name: "rodilla", points: [24, 26, 28] },
+            { name: "tobillo", points: [26, 28, 32] },
+          ]
+        : [
+            { name: "cadera", points: [11, 23, 25] },
+            { name: "rodilla", points: [23, 25, 27] },
+            { name: "tobillo", points: [25, 27, 31] },
+          ];
+    }
+  };
+
+  const angleLandmarks = getAngleLandmarks();
 
   // ---------- Guardar secuencia ----------
   const saveSequence = () => {
@@ -122,8 +175,8 @@ const Biomecanica = () => {
         }
 
         // --- Dibujo de puntos y líneas ---
-        ctx.fillStyle = "yellow";
-        ctx.strokeStyle = "cyan";
+        ctx.fillStyle = "#60DE00";
+        ctx.strokeStyle = "#DE0000";
         ctx.lineWidth = 3;
 
         ids.forEach((id) => {
@@ -144,7 +197,68 @@ const Biomecanica = () => {
           ctx.stroke();
         });
 
-        // --- Guardar frame si estamos grabando ---
+        // --- Dibujar ángulos como arcos tipo transportador ---
+        angleLandmarks.forEach((a) => {
+          const [i1, i2, i3] = a.points;
+          const p1 = lm[i1];
+          const p2 = lm[i2]; // vértice del ángulo
+          const p3 = lm[i3];
+
+          // Validar que los puntos existan
+          if (!p1 || !p2 || !p3) return;
+
+          // Calcular vectores relativos al vértice
+          let angle1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+          let angle2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
+
+          if (isNaN(angle1) || isNaN(angle2)) return;
+
+          // Normalizar para que siempre sea sentido horario y menor a 2π
+          if (angle2 < angle1) angle2 += 2 * Math.PI;
+
+          const radius = Math.min(30, canvas.width * 0.05); // radio proporcional al canvas
+
+          ctx.beginPath();
+          ctx.moveTo(p2.x * canvas.width, p2.y * canvas.height); // vértice del ángulo
+          ctx.arc(
+            p2.x * canvas.width,
+            p2.y * canvas.height,
+            radius,
+            angle1,
+            angle2,
+            false
+          );
+          ctx.closePath(); // cierra el camino de vuelta al vértice
+          ctx.fillStyle = "rgba(255,0,0,0.3)"; // rojo semitransparente
+          ctx.fill(); // rellena el sector
+          ctx.strokeStyle = "red"; // opcional, contorno más visible
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Dibujar valor del ángulo
+          const angle = getAngle(p1, p2, p3).toFixed(0);
+          ctx.fillStyle = "#60DE00";
+          ctx.font = "18px Arial";
+          ctx.fillText(
+            `${angle}°`,
+            p2.x * canvas.width + radius + 5,
+            p2.y * canvas.height - 5
+          );
+        });
+
+        // Dentro de pose.onResults y después de calcular los landmarks
+        const currentAngles = getAngleLandmarks().map((a) => {
+          const [i1, i2, i3] = a.points;
+          return {
+            name: a.name,
+            value: getAngle(lm[i1], lm[i2], lm[i3]), // ángulo en grados
+            points: [i1, i2, i3] as [number, number, number],
+          };
+        });
+
+        // Guardar en estado para mostrarlo en tiempo real
+        setRealtimeAngles(currentAngles);
+
         // --- Guardar frame si estamos grabando ---
         if (recording) {
           const now = performance.now();
@@ -181,10 +295,36 @@ const Biomecanica = () => {
             for (let i = 0; i < ids.length - 1; i++) {
               localLines.push([i, i + 1]);
             }
+            const angles = getAngleLandmarks()
+              .map((a) => {
+                const [i1, i2, i3] = a.points;
+                const p1 = lm[i1];
+                const p2 = lm[i2];
+                const p3 = lm[i3];
+
+                if (!p1 || !p2 || !p3) return null; // si falta un punto, ignoramos este ángulo
+
+                return {
+                  name: a.name,
+                  value: getAngle(p1, p2, p3),
+                  points: [i1, i2, i3] as [number, number, number],
+                };
+              })
+              .filter(Boolean) as {
+              name: string;
+              value: number;
+              points: [number, number, number];
+            }[];
 
             setFrames((prev) => [
               ...prev,
-              { id: frameIdRef.current++, image, points, lines: localLines },
+              {
+                id: frameIdRef.current++,
+                image,
+                points,
+                lines: localLines,
+                angles,
+              },
             ]);
           } else {
             // detener grabación cuando pasaron 3 segundos reales
@@ -224,10 +364,9 @@ const Biomecanica = () => {
   const intervalRef = useRef<any | null>(null);
 
   // ------------------ Next Frame ------------------
+
   const nextFrame = () => {
-    if (currentFrameIndex < frames.length - 1) {
-      setCurrentFrameIndex((i) => i + 1);
-    }
+    setCurrentFrameIndex((prev) => Math.min(prev + 1, frames.length - 1));
   };
 
   const handleNextPressStart = () => {
@@ -247,9 +386,7 @@ const Biomecanica = () => {
   // ------------------ Previous Frame ------------------
 
   const prevFrame = () => {
-    if (currentFrameIndex > 0) {
-      setCurrentFrameIndex((i) => i - 1);
-    }
+    setCurrentFrameIndex((prev) => Math.max(prev - 1, 0));
   };
 
   const handlePrevPressStart = () => {
@@ -289,11 +426,67 @@ const Biomecanica = () => {
     });
   };
 
+  useEffect(() => {
+    if (frames[currentFrameIndex] !== undefined) {
+      console.log("DATA LINES: ", frames[currentFrameIndex].lines);
+      console.log("DATA POINTS: ", frames[currentFrameIndex].points);
+    }
+  }, [frames[currentFrameIndex]]);
+
+  {
+    /* Función para calcular ángulo entre tres puntos */
+  }
+  function angleBetweenPoints(
+    p1: { x: number; y: number },
+    p2: { x: number; y: number },
+    p3: { x: number; y: number }
+  ) {
+    const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
+    const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
+
+    const dot = v1.x * v2.x + v1.y * v2.y;
+    const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
+    const mag2 = Math.sqrt(v2.x ** 2 + v2.y ** 2);
+
+    if (mag1 === 0 || mag2 === 0) return 0;
+
+    const angleRad = Math.acos(dot / (mag1 * mag2));
+    return angleRad;
+  }
+
+  // Función para generar el path SVG de un arco tipo sector
+  function angleArcPath(p1, p2, p3, radius: number) {
+    const angle1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+    let angle2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
+    if (angle2 < angle1) angle2 += 2 * Math.PI;
+
+    const x1 = p2.x + radius * Math.cos(angle1);
+    const y1 = p2.y + radius * Math.sin(angle1);
+    const x2 = p2.x + radius * Math.cos(angle2);
+    const y2 = p2.y + radius * Math.sin(angle2);
+
+    const largeArcFlag = angle2 - angle1 > Math.PI ? 1 : 0;
+
+    return `
+    M ${p2.x},${p2.y} 
+    L ${x1},${y1} 
+    A ${radius},${radius} 0 ${largeArcFlag} 1 ${x2},${y2} 
+    Z
+  `;
+  }
+
   // ------------------ Render ------------------
   return (
-    <div className="p-6 flex flex-col bg-gray-50 min-h-screen">
+    <div className="p-6 flex bg-gray-50 min-h-screen">
+      <div className="w-1/3 flex justify-center items-center">
+        <div className="fixed">
+          {/* Encabezado */}
+          <ProtocoloCiclismo />
+        </div>
+      </div>
+
       {/* Video en vivo */}
-      <div className="w-1/2 ">
+      <div className="w-2/3 flex flex-col items-center justify-center">
         <div className="relative w-[448px] h-[336px] rounded-lg overflow-hidden shadow-lg border border-gray-200 mx-auto">
           <video
             ref={videoRef}
@@ -308,6 +501,13 @@ const Biomecanica = () => {
           />
           <div className="absolute top-2 left-2 bg-white/70 px-3 py-1 rounded text-sm font-medium text-gray-700 shadow-sm">
             Modo: {modo} | Lado: {lado}
+          </div>
+          <div className="absolute bottom-1 left-1 bg-white p-1 rounded shadow text-xs opacity-70">
+            {realtimeAngles.map((a) => (
+              <div key={a.name}>
+                {a.name}: {a.value.toFixed(0)}°
+              </div>
+            ))}
           </div>
         </div>
 
@@ -370,8 +570,8 @@ const Biomecanica = () => {
 
         {/* Visor de frames */}
         {frames.length > 0 && !recording && (
-          <div className="mt-4 w-full">
-            <div className="flex justify-between items-center mb-4 text-gray-700 font-medium">
+          <div className="mt-4 w-full max-w-xl">
+            <div className="flex justify-around items-center mb-4 text-gray-700 font-medium">
               <button
                 onMouseDown={handlePrevPressStart}
                 onMouseUp={handlePrevPressEnd}
@@ -483,6 +683,7 @@ const Biomecanica = () => {
                   canvasRef.current?.height || 480
                 }`}
               >
+                {/* Líneas */}
                 {frames[currentFrameIndex].lines.map(([a, b], idx) => {
                   const pa = frames[currentFrameIndex].points[a];
                   const pb = frames[currentFrameIndex].points[b];
@@ -493,18 +694,20 @@ const Biomecanica = () => {
                       y1={pa.y * (canvasRef.current?.height || 480)}
                       x2={pb.x * (canvasRef.current?.width || 640)}
                       y2={pb.y * (canvasRef.current?.height || 480)}
-                      stroke="#22D3EE"
+                      stroke="#DE0000"
                       strokeWidth="3"
                     />
                   );
                 })}
+
+                {/* Puntos */}
                 {frames[currentFrameIndex].points.map((p, idx) => (
                   <circle
                     key={`point-${idx}`}
                     cx={p.x * (canvasRef.current?.width || 640)}
                     cy={p.y * (canvasRef.current?.height || 480)}
                     r="6"
-                    fill="red"
+                    fill="#60DE00"
                     style={{ cursor: "grab" }}
                     onMouseDown={() => {
                       const moveHandler = (ev: MouseEvent) =>
@@ -518,6 +721,83 @@ const Biomecanica = () => {
                     }}
                   />
                 ))}
+
+                {/* Ángulos como arcos rojos */}
+                {(() => {
+                  const points = frames[currentFrameIndex].points;
+                  const lines = frames[currentFrameIndex].lines;
+                  const cw = canvasRef.current?.width ?? 640;
+                  const ch = canvasRef.current?.height ?? 480;
+                  const angles = [];
+
+                  // Calcular todos los ángulos en cada vértice
+                  points.forEach((p, idx) => {
+                    const connectedLines = lines.filter((line) =>
+                      line.includes(idx)
+                    );
+                    for (let i = 0; i < connectedLines.length; i++) {
+                      for (let j = i + 1; j < connectedLines.length; j++) {
+                        const line1 = connectedLines[i];
+                        const line2 = connectedLines[j];
+
+                        const other1 = line1[0] === idx ? line1[1] : line1[0];
+                        const other2 = line2[0] === idx ? line2[1] : line2[0];
+
+                        const angleValue = angleBetweenPoints(
+                          points[other1],
+                          p,
+                          points[other2]
+                        );
+
+                        angles.push({
+                          vertex: idx,
+                          p1: other1,
+                          p2: idx,
+                          p3: other2,
+                          value: angleValue,
+                        });
+                      }
+                    }
+                  });
+
+                  return angles.map((a, idx) => {
+                    const p1 = {
+                      x: points[a.p1].x * cw,
+                      y: points[a.p1].y * ch,
+                    };
+                    const p2 = {
+                      x: points[a.p2].x * cw,
+                      y: points[a.p2].y * ch,
+                    };
+                    const p3 = {
+                      x: points[a.p3].x * cw,
+                      y: points[a.p3].y * ch,
+                    };
+
+                    const radius = Math.min(30, cw * 0.05);
+                    const path = angleArcPath(p1, p2, p3, radius);
+
+                    return (
+                      <g key={`angle-${idx}`}>
+                        <path
+                          d={path}
+                          fill="rgba(255,0,0,0.3)"
+                          stroke="red"
+                          strokeWidth="2"
+                        />
+                        <text
+                          x={p2.x + radius + 5}
+                          y={p2.y - 5}
+                          fill="#60DE00"
+                          fontSize="14"
+                          fontWeight="bold"
+                        >
+                          {Math.round((a.value * 180) / Math.PI)}°
+                        </text>
+                      </g>
+                    );
+                  });
+                })()}
               </svg>
             </div>
           </div>
@@ -546,7 +826,6 @@ const Biomecanica = () => {
           </div>
         )}
       </div>
-      <div className="w-1/2"></div>
     </div>
   );
 };

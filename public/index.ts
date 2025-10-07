@@ -16,6 +16,8 @@ const bici7_der = "./Bici7_der.png";
 const bici7_izq = "./Bici7_izq.png";
 const bici8_der = "./Bici8_der.png";
 const bici8_izq = "./Bici8_izq.png";
+const icono_bici_der = "./icono_bici_der.png";
+const icono_bici_izq = "./icono_bici_izq.png";
 
 export {
   logo_cop,
@@ -36,4 +38,6 @@ export {
   bici7_izq,
   bici8_der,
   bici8_izq,
+  icono_bici_der,
+  icono_bici_izq,
 };

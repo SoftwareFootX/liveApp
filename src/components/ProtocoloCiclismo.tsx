@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { CiCircleChevLeft, CiCircleChevRight } from "react-icons/ci";
-import { LiaHandPointLeft, LiaHandPointRight } from "react-icons/lia";
+import { GoArrowLeft, GoArrowRight } from "react-icons/go";
 
 import {
   bici1_der,
@@ -19,9 +18,16 @@ import {
   bici6_izq,
   bici7_izq,
   bici8_izq,
+  icono_bici_der,
+  icono_bici_izq,
 } from "../../public";
 
-const ProtocoloCiclismo = () => {
+interface Props {
+  side: string;
+  setSide: (value: any) => void;
+}
+
+const ProtocoloCiclismo = ({ side, setSide }: Props) => {
   const bikeImagesDer = [
     { src: bici1_der, title: "Avance inicial" },
     { src: bici2_der, title: "Avance medio" },
@@ -47,7 +53,6 @@ const ProtocoloCiclismo = () => {
   // 🔹 Estado para índice actual
   const [currentIndex, setCurrentIndex] = useState(0);
   // 🔹 Estado para lado activo ("der" o "izq")
-  const [side, setSide] = useState<"der" | "izq">("der");
 
   const bikeImages = side === "der" ? bikeImagesDer : bikeImagesIzq;
 
@@ -67,40 +72,35 @@ const ProtocoloCiclismo = () => {
   const current = bikeImages[currentIndex];
 
   return (
-    <div className="w-80">
-      {/* 🔹 Botones para elegir lado */}
+    <div className="w-80 xs:w-84 h-screen flex flex-col justify-center items-center">
+      {/* 🔹 Navegación entre imágenes */}
       <div className="flex justify-around items-center p-2 text-gray-700 gap-2">
         <button
-          className={`border rounded w-40 flex justify-center items-center py-1 ${
+          className={`border rounded w-10 flex justify-center items-center py-1 ${
             side === "izq" ? "border-blue-600 bg-blue-100" : "border-gray-700"
           }`}
           onClick={() => handleSideChange("izq")}
         >
-          <LiaHandPointLeft size={20} />
+          <img src={icono_bici_izq} className="w-4.5" />
         </button>
-
-        <button
-          className={`border rounded w-40 flex justify-center items-center py-1 ${
-            side === "der" ? "border-blue-600 bg-blue-100" : "border-gray-700"
-          }`}
-          onClick={() => handleSideChange("der")}
-        >
-          <LiaHandPointRight size={20} />
-        </button>
-      </div>
-
-      {/* 🔹 Navegación entre imágenes */}
-      <div className="flex justify-around items-center p-2 text-gray-700">
-        <button onClick={handlePrev}>
-          <CiCircleChevLeft size={30} />
+        <button className="border-gray-700 border rounded" onClick={handlePrev}>
+          <GoArrowLeft size={24} />
         </button>
 
         <span className="border border-gray-700 rounded w-40 flex justify-center items-center">
           {current.title}
         </span>
 
-        <button onClick={handleNext}>
-          <CiCircleChevRight size={30} />
+        <button className="border-gray-700 border rounded" onClick={handleNext}>
+          <GoArrowRight size={24} />
+        </button>
+        <button
+          className={`border rounded w-10 flex justify-center items-center py-1 ${
+            side === "der" ? "border-blue-600 bg-blue-100" : "border-gray-700"
+          }`}
+          onClick={() => handleSideChange("der")}
+        >
+          <img src={icono_bici_der} className="w-4.5" />
         </button>
       </div>
 

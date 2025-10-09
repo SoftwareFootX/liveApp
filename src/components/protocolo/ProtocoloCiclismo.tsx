@@ -1,0 +1,168 @@
+import { useState } from "react";
+import { GoArrowLeft, GoArrowRight } from "react-icons/go";
+
+import {
+  bici1_der,
+  bici2_der,
+  bici3_der,
+  bici4_der,
+  bici5_der,
+  bici6_der,
+  bici7_der,
+  bici8_der,
+  bici1_izq,
+  bici2_izq,
+  bici3_izq,
+  bici4_izq,
+  bici5_izq,
+  bici6_izq,
+  bici7_izq,
+  bici8_izq,
+  icono_bici_der,
+  icono_bici_izq,
+} from "../../../public";
+
+interface Props {
+  side: string;
+  setSide: (value: any) => void;
+}
+
+const bikeImagesDer = [
+  { src: bici1_der, title: "Avance inicial" },
+  { src: bici2_der, title: "Avance medio" },
+  { src: bici3_der, title: "Impulso inicial" },
+  { src: bici4_der, title: "Impulso medio" },
+  { src: bici5_der, title: "Arrastre inicial" },
+  { src: bici6_der, title: "Arrastre medio" },
+  { src: bici7_der, title: "Recobro inicial" },
+  { src: bici8_der, title: "Recobro medio" },
+];
+
+const bikeImagesIzq = [
+  { src: bici1_izq, title: "Avance inicial" },
+  { src: bici2_izq, title: "Avance medio" },
+  { src: bici3_izq, title: "Impulso inicial" },
+  { src: bici4_izq, title: "Impulso medio" },
+  { src: bici5_izq, title: "Arrastre inicial" },
+  { src: bici6_izq, title: "Arrastre medio" },
+  { src: bici7_izq, title: "Recobro inicial" },
+  { src: bici8_izq, title: "Recobro medio" },
+];
+const ProtocoloCiclismo = ({ side, setSide }: Props) => {
+  const [protocolo, setProtocolo] = useState(true);
+
+  // 🔹 Estado para índice actual
+  const [currentIndex, setCurrentIndex] = useState(0);
+  // 🔹 Estado para lado activo ("der" o "izq")
+
+  const bikeImages = side === "der" ? bikeImagesDer : bikeImagesIzq;
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? bikeImages.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === bikeImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleSideChange = (newSide: "der" | "izq") => {
+    setSide(newSide);
+    setCurrentIndex(0); // opcional: volver a la primera imagen al cambiar de lado
+  };
+
+  const current = bikeImages[currentIndex];
+
+  return (
+    <div className="w-80 xs:w-84 h-screen flex flex-col justify-center items-center">
+      {/* 🔹 Navegación protocolo o previsualizacion */}
+
+      <div className="flex justify-between items-center gap-2">
+        <button
+          className={`border border-gray-600 rounded px-8 py-1 text-sm ${
+            protocolo ? "bg-gray-600 text-white" : "bg-gray-200 text-black"
+          }`}
+          onClick={() => setProtocolo(true)}
+        >
+          PROTOCOLO
+        </button>
+        <button
+          className={`border border-gray-600 rounded px-8 py-1 text-sm ${
+            protocolo ? "bg-gray-200 text-black" : "bg-gray-600 text-white"
+          }`}
+          onClick={() => setProtocolo(false)}
+        >
+          PREVISUALIZAR
+        </button>
+      </div>
+      {protocolo && (
+        <div>
+          {/* 🔹 Navegación entre imágenes */}
+          <div className="flex justify-around items-center p-2 text-gray-700 gap-2">
+            <button
+              className={`border rounded w-10 flex justify-center items-center py-1 ${
+                side === "izq"
+                  ? "border-blue-600 bg-blue-100"
+                  : "border-gray-700"
+              }`}
+              onClick={() => handleSideChange("izq")}
+            >
+              <img src={icono_bici_izq} className="w-4.5" />
+            </button>
+            <button
+              className="border-gray-700 border rounded"
+              onClick={handlePrev}
+            >
+              <GoArrowLeft size={24} />
+            </button>
+
+            <span className="border border-gray-700 rounded w-40 flex justify-center items-center">
+              {current.title}
+            </span>
+
+            <button
+              className="border-gray-700 border rounded"
+              onClick={handleNext}
+            >
+              <GoArrowRight size={24} />
+            </button>
+            <button
+              className={`border rounded w-10 flex justify-center items-center py-1 ${
+                side === "der"
+                  ? "border-blue-600 bg-blue-100"
+                  : "border-gray-700"
+              }`}
+              onClick={() => handleSideChange("der")}
+            >
+              <img src={icono_bici_der} className="w-4.5" />
+            </button>
+          </div>
+
+          {/* 🔹 Imagen actual */}
+          <img
+            src={current.src}
+            alt="bici"
+            className="w-full rounded-xl shadow-md"
+          />
+
+          {/* 🔹 Indicador opcional */}
+          <div className="text-center text-gray-500 mt-2">
+            {/* {currentIndex + 1} / {bikeImages.length} —{" "}
+        {side === "der" ? "Derecha" : "Izquierda"} */}
+            Puntos: Mano, codo, hombro, cadera, rodilla, tobillo, punta del pie.
+          </div>
+          <div className="text-center text-gray-500 mt-2">
+            {/* {currentIndex + 1} / {bikeImages.length} —{" "}
+        {side === "der" ? "Derecha" : "Izquierda"} */}
+            Angulos: Codo, cadera, rodilla, tobillo.
+          </div>
+        </div>
+      )}
+
+      {!protocolo && (
+        <div className="w-full h-[calc(100vh - 30px)] bg-red-200"></div>
+      )}
+    </div>
+  );
+};
+
+export { ProtocoloCiclismo };

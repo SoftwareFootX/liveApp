@@ -21,10 +21,16 @@ import {
   icono_bici_der,
   icono_bici_izq,
 } from "../../../public";
+import { PdfPreview } from "./PdfPreview";
 
-interface Props {
+interface PropsProtocolo {
   side: string;
   setSide: (value: any) => void;
+  frameSeleccionado: any;
+}
+
+interface Props {
+  data: PropsProtocolo;
 }
 
 const bikeImagesDer = [
@@ -48,7 +54,8 @@ const bikeImagesIzq = [
   { src: bici7_izq, title: "Recobro inicial" },
   { src: bici8_izq, title: "Recobro medio" },
 ];
-const ProtocoloCiclismo = ({ side, setSide }: Props) => {
+const ProtocoloCiclismo = ({ data }: Props) => {
+  const { side, setSide, frameSeleccionado } = data;
   const [protocolo, setProtocolo] = useState(true);
 
   // 🔹 Estado para índice actual
@@ -73,7 +80,7 @@ const ProtocoloCiclismo = ({ side, setSide }: Props) => {
   const current = bikeImages[currentIndex];
 
   return (
-    <div className="w-80 xs:w-84 h-screen flex flex-col justify-center items-center">
+    <div className="w-full h-screen flex flex-col justify-center items-center ">
       {/* 🔹 Navegación protocolo o previsualizacion */}
 
       <div className="flex justify-between items-center gap-2">
@@ -158,9 +165,10 @@ const ProtocoloCiclismo = ({ side, setSide }: Props) => {
         </div>
       )}
 
-      {!protocolo && (
-        <div className="w-full h-[calc(100vh - 30px)] bg-red-200"></div>
-      )}
+      <PdfPreview
+        frameSeleccionado={frameSeleccionado}
+        className={`${protocolo ? "hidden" : "block"}`}
+      />
     </div>
   );
 };

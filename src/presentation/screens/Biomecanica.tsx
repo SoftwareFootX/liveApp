@@ -49,6 +49,7 @@ const Biomecanica = () => {
   >([]);
 
   const [config, setConfig] = useState(false);
+  const [frameSeleccionado, setFrameSeleccionado] = useState(null);
   const [recordingVideo, setRecordingVideo] = useState(true);
 
   // ---------- Guardar secuencia ----------
@@ -91,10 +92,14 @@ const Biomecanica = () => {
   return (
     <div className="p-6 flex bg-gray-50 min-h-screen">
       <div className="w-1/3 flex justify-center items-center h-screen">
-        <div className="fixed top-0">
-          {/* Encabezado */}
-          <ProtocoloCiclismo side={lado} setSide={setLado} />
-        </div>
+        {/* Encabezado */}
+        <ProtocoloCiclismo
+          data={{
+            side: lado,
+            setSide: setLado,
+            frameSeleccionado,
+          }}
+        />
       </div>
 
       <div className="w-2/3 flex flex-col items-center justify-center">
@@ -164,7 +169,9 @@ const Biomecanica = () => {
           </div>
         )}
 
-        {!recordingVideo && <SaveSecuences data={{ savedSequences }} />}
+        {!recordingVideo && (
+          <SaveSecuences data={{ savedSequences, setFrameSeleccionado }} />
+        )}
       </div>
     </div>
   );

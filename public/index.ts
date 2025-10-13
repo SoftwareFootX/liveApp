@@ -18,6 +18,7 @@ const bici8_der = "./Bici8_der.png";
 const bici8_izq = "./Bici8_izq.png";
 const icono_bici_der = "./icono_bici_der.png";
 const icono_bici_izq = "./icono_bici_izq.png";
+const kinnx_logo = "./kinnx_logo.png";
 
 export {
   logo_cop,
@@ -40,4 +41,5 @@ export {
   bici8_izq,
   icono_bici_der,
   icono_bici_izq,
+  kinnx_logo,
 };

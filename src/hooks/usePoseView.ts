@@ -125,15 +125,6 @@ const usePoseView = () => {
         ctx.strokeStyle = "#DE0000";
         ctx.lineWidth = 3;
 
-        ids.forEach((id) => {
-          const p = lm[id];
-          const x = p.x * canvas.width;
-          const y = p.y * canvas.height;
-          ctx.beginPath();
-          ctx.arc(x, y, 6, 0, 2 * Math.PI);
-          ctx.fill();
-        });
-
         lines.forEach(([a, b]) => {
           const pa = lm[a],
             pb = lm[b];
@@ -204,6 +195,15 @@ const usePoseView = () => {
 
         // Guardar en estado para mostrarlo en tiempo real
         setRealtimeAngles(currentAngles);
+
+        ids.forEach((id) => {
+          const p = lm[id];
+          const x = p.x * canvas.width;
+          const y = p.y * canvas.height;
+          ctx.beginPath();
+          ctx.arc(x, y, 6, 0, 2 * Math.PI);
+          ctx.fill();
+        });
 
         // --- Guardar frame si estamos grabando ---
         if (recording) {

@@ -80,21 +80,20 @@ const ProtocoloCiclismo = ({ data }: Props) => {
   const current = bikeImages[currentIndex];
 
   return (
-    <div className="w-full h-screen flex flex-col justify-center items-center ">
+    <div className="w-full flex flex-col justify-center items-center">
       {/* 🔹 Navegación protocolo o previsualizacion */}
-
-      <div className="flex justify-between items-center gap-2">
+      <div className="flex justify-between items-center gap-10 text-xs">
         <button
-          className={`border border-gray-600 rounded px-8 py-1 text-sm ${
-            protocolo ? "bg-gray-600 text-white" : "bg-gray-200 text-black"
+          className={`border border-gray-300 rounded-full px-2 py-1 ${
+            protocolo ? "bg-primary text-white" : "bg-gray-200 text-black"
           }`}
           onClick={() => setProtocolo(true)}
         >
           PROTOCOLO
         </button>
         <button
-          className={`border border-gray-600 rounded px-8 py-1 text-sm ${
-            protocolo ? "bg-gray-200 text-black" : "bg-gray-600 text-white"
+          className={`border border-gray-300 rounded-full px-2 py-1 ${
+            protocolo ? "bg-gray-200 text-black" : "bg-primary text-white"
           }`}
           onClick={() => setProtocolo(false)}
         >

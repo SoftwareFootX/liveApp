@@ -339,6 +339,8 @@ const SaveSecuences = ({ data }: Props) => {
     }, "image/png");
   };
 
+  const [etapaSeleccionada, setEtapaSeleccionada] = useState("---");
+
   return (
     <DndContext
       sensors={sensors}
@@ -358,12 +360,16 @@ const SaveSecuences = ({ data }: Props) => {
               <SortableItem key={seq.id} id={seq.id}>
                 <div className="p-2 border rounded-lg shadow bg-white flex flex-col items-center">
                   <span className="text-gray-500 text-sm">{seq.title}</span>
-                  <div className="flex items-center gap-2 w-full justify-end text-gray-700 mb-4 mt-2">
+                  <div className="flex items-center gap-2 w-full  justify-between text-gray-700  my-2">
                     <button
                       onClick={(e) => {
                         e.stopPropagation(); // 🔥 evita que el click dispare drag
                         e.preventDefault(); // 🔥 evita que dnd-kit capture el evento
-                        setFrameSeleccionado({ ...frame, title: seq.title });
+                        setFrameSeleccionado({
+                          ...frame,
+                          title: seq.title,
+                          etapa: etapaSeleccionada,
+                        });
                       }}
                       className="rounded-full border px-2 hover:bg-gray-100 z-10"
                     >
@@ -394,6 +400,23 @@ const SaveSecuences = ({ data }: Props) => {
                     >
                       →
                     </button>
+                  </div>
+
+                  <div className="flex justify-center items-center gap-3 text-sm text-gray-600 mb-2">
+                    <span>Etapa: </span>
+                    <select
+                      onChange={(e) => setEtapaSeleccionada(e.target.value)}
+                    >
+                      <option value="---">-------------</option>
+                      <option value="Avance inicial">Avance inicial</option>
+                      <option value="Avance medio">Avance medio</option>
+                      <option value="Impulso inicial">Impulso inicial</option>
+                      <option value="Impulso inicial">Impulso inicial</option>
+                      <option value="Arrastre inicial">Arrastre inicial</option>
+                      <option value="Arrastre inicial">Arrastre inicial</option>
+                      <option value="Recobro inicial">Recobro inicial</option>
+                      <option value="Recobro inicial">Recobro inicial</option>
+                    </select>
                   </div>
 
                   <div className="relative border rounded-lg overflow-hidden shadow-lg w-64 mx-auto">

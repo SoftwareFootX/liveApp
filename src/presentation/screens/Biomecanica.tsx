@@ -5,6 +5,8 @@ import { SaveSecuences } from "../../components/secuencias/SaveSecuences";
 import { FrameView } from "../../components/secuencias/FrameView";
 import { CanvasVideo } from "../../components/video/CanvasVideo";
 import { usePoseView } from "../../hooks/usePoseView";
+import { IoArrowBack } from "react-icons/io5";
+import { Link } from "react-router-dom";
 
 // ------------------ Interfaces ------------------
 interface PosePoint {
@@ -91,7 +93,13 @@ const Biomecanica = () => {
   // ------------------ Render ------------------
   return (
     <div className="p-6 flex bg-gray-50 min-h-screen">
-      <div className="w-1/3 flex justify-center items-center h-screen">
+      <Link
+        to="/election"
+        className="absolute h-10 w-10 text-3xl top-5 right-5 text-primary"
+      >
+        <IoArrowBack />
+      </Link>
+      <div className="w-1/3 flex justify-center items-center h-auto">
         {/* Encabezado */}
         <ProtocoloCiclismo
           data={{
@@ -104,11 +112,11 @@ const Biomecanica = () => {
 
       <div className="w-2/3 flex flex-col items-center justify-center">
         {(frames.length > 0 || savedSequences.length > 0) && (
-          <div className="w-1/2 flex justify-between items-center mb-5">
+          <div className="flex items-center mb-5 gap-10 text-xs">
             <button
-              className={`border border-gray-600 rounded px-8 py-1 text-sm ${
+              className={`border border-gray-300 rounded-full px-2 py-1 ${
                 recordingVideo
-                  ? "bg-gray-600 text-white"
+                  ? "bg-primary text-white"
                   : "bg-gray-200 text-black"
               }`}
               onClick={() => setRecordingVideo(true)}
@@ -116,10 +124,10 @@ const Biomecanica = () => {
               GRABAR
             </button>
             <button
-              className={`border border-gray-600 rounded px-8 py-1 text-sm ${
+              className={`border border-gray-300 rounded-full px-2 py-1 ${
                 recordingVideo
                   ? "bg-gray-200 text-black"
-                  : "bg-gray-600 text-white"
+                  : "bg-primary text-white"
               }`}
               onClick={() => setRecordingVideo(false)}
             >

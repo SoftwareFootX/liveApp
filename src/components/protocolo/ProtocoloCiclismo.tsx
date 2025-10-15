@@ -80,7 +80,7 @@ const ProtocoloCiclismo = ({ data }: Props) => {
   const current = bikeImages[currentIndex];
 
   return (
-    <div className="w-full flex flex-col justify-center items-center">
+    <div className="sm:w-full w-84 flex flex-col justify-center items-center mt-5 sm:mt-0">
       {/* 🔹 Navegación protocolo o previsualizacion */}
       <div className="flex justify-between items-center gap-10 text-xs">
         <button
@@ -101,7 +101,7 @@ const ProtocoloCiclismo = ({ data }: Props) => {
         </button>
       </div>
       {protocolo && (
-        <div>
+        <div className="flex flex-col items-center">
           {/* 🔹 Navegación entre imágenes */}
           <div className="flex justify-around items-center p-2 text-gray-700 gap-2">
             <button
@@ -147,7 +147,7 @@ const ProtocoloCiclismo = ({ data }: Props) => {
           <img
             src={current.src}
             alt="bici"
-            className="w-full rounded-xl shadow-md"
+            className="w-80 sm:w-full rounded-xl shadow-md"
           />
 
           {/* 🔹 Indicador opcional */}

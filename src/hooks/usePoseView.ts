@@ -45,6 +45,8 @@ const usePoseView = () => {
   const [realtimeAngles, setRealtimeAngles] = useState<
     { name: string; value: number; points: [number, number, number] }[]
   >([]);
+  const [usingUploadedVideo, setUsingUploadedVideo] = useState(false);
+  const [videoURL, setVideoURL] = useState<string | null>(null);
 
   // ---------- Funcion para calcular angulos ----------
   const getAngle = (
@@ -282,41 +284,89 @@ const usePoseView = () => {
     });
 
     // --- Configuración de cámara ---
+    let rafId: number;
+    let camera: Camera | null = null;
     const video = videoRef.current;
+
     if (!video) return;
-    const camera = new Camera(video, {
-      onFrame: async () => {
-        await pose.send({ image: video });
-      },
-      width: CAMERA_WIDTH,
-      height: CAMERA_HEIGHT,
-    });
-    camera.start();
+
+    if (usingUploadedVideo) {
+      // Modo video cargado
+      const onFrame = async () => {
+        if (
+          video.readyState >= 2 &&
+          !video.paused &&
+          !video.ended &&
+          video.videoWidth > 0 &&
+          video.videoHeight > 0
+        ) {
+          try {
+            await pose.send({ image: video });
+          } catch (err) {
+            console.error("Error al enviar frame al modelo:", err);
+          }
+        }
+        rafId = requestAnimationFrame(onFrame);
+      };
+
+      // 🔄 Reiniciamos srcObject en modo video cargado
+      video.srcObject = null;
+
+      video.onloadeddata = () => {
+        video.play();
+        requestAnimationFrame(onFrame);
+      };
+    } else {
+      camera = new Camera(video, {
+        onFrame: async () => {
+          await pose.send({ image: video });
+        },
+        width: CAMERA_WIDTH,
+        height: CAMERA_HEIGHT,
+      });
+      camera.start();
+    }
 
     return () => {
       pose.close();
-      camera.stop();
+      camera?.stop();
+      cancelAnimationFrame(rafId);
     };
   };
 
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setVideoURL(url); // guardalo en el estado
+      setUsingUploadedVideo(true);
+    }
+  };
+
   return {
-    mediaPipePose,
-    videoRef,
-    canvasRef,
+    usingUploadedVideo,
     recordingStartRef,
-    frameIdRef,
-    recording,
-    setRecording,
-    lado,
-    setLado,
-    frames,
-    setFrames,
-    segundos,
-    setSegundos,
     currentFrameIndex,
-    setCurrentFrameIndex,
     realtimeAngles,
+    frameIdRef,
+    canvasRef,
+    recording,
+    segundos,
+    videoRef,
+    videoURL,
+    frames,
+    lado,
+
+    setCurrentFrameIndex,
+    setUsingUploadedVideo,
     setRealtimeAngles,
+    handleVideoUpload,
+    mediaPipePose,
+    setRecording,
+    setVideoURL,
+    setSegundos,
+    setFrames,
+    setLado,
   };
 };
 

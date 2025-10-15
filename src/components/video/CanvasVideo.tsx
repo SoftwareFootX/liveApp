@@ -35,9 +35,9 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
   } = data;
   return (
     <div
-      className={`relative w-[448px] h-auto rounded-lg overflow-hidden shadow-lg border border-gray-200 mx-auto ${
+      className={`relative w-[340px] lg:w-[448px] h-auto rounded-lg overflow-hidden shadow-lg border border-gray-200 mx-auto ${
         recordingVideo ? "block" : "hidden"
-      }`}
+      } mt-5 sm:mt-0`}
     >
       <video
         ref={videoRef}

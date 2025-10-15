@@ -138,7 +138,7 @@ const FrameView = ({ data }: PropsFrameView) => {
   return (
     <>
       {frames.length > 0 && (
-        <div className="mt-4 w-full max-w-lg">
+        <div className="mt-4 max-w-lg">
           <div className="flex items-center justify-center gap-6 text-gray-700 select-none mb-4">
             <button
               onMouseDown={handlePrevPressStart}
@@ -169,7 +169,7 @@ const FrameView = ({ data }: PropsFrameView) => {
             </button>
           </div>
 
-          <div className="relative border rounded-lg overflow-hidden shadow-lg w-96 mx-auto">
+          <div className="relative border rounded-lg overflow-hidden shadow-lg w-78 sm:w-82 mx-auto">
             <img
               src={frames[currentFrameIndex].image}
               alt={`frame-${currentFrameIndex}`}

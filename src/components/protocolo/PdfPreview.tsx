@@ -216,10 +216,10 @@ const PdfPreview = ({
         />
       </div>
 
-      <div className="w-full flex justify-center items-center mt-2">
+      <div className="w-full flex justify-center items-center mt-4">
         <button
           onClick={handleGenerarPDF}
-          className="bg-blue-600 text-white rounded px-20 hover:bg-blue-700"
+          className="bg-primary text-white rounded px-20 hover:bg-primary-opacity "
         >
           Generar PDF
         </button>
@@ -286,7 +286,7 @@ const Pagina = ({
         {cuadros.map((frame: FrameData | null, idx: number) => (
           <div
             key={idx}
-            className="relative flex justify-center items-center rounded-md flex-col min-h-30"
+            className="relative flex justify-center items-center rounded-md flex-col min-h-30 "
             style={{
               border: `1px solid ${
                 cuadroSeleccionado === idx ? "#2563eb" : "#d1d5db"

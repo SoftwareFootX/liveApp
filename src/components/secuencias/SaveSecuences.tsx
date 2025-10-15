@@ -66,6 +66,7 @@ const SaveSecuences = ({ data }: Props) => {
   const intervalRefs = useRef<(ReturnType<typeof setTimeout> | null)[]>(
     sequences.map(() => null)
   );
+  const [etapaSeleccionada, setEtapaSeleccionada] = useState("---");
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -339,8 +340,6 @@ const SaveSecuences = ({ data }: Props) => {
     }, "image/png");
   };
 
-  const [etapaSeleccionada, setEtapaSeleccionada] = useState("---");
-
   return (
     <DndContext
       sensors={sensors}
@@ -419,7 +418,7 @@ const SaveSecuences = ({ data }: Props) => {
                     </select>
                   </div>
 
-                  <div className="relative border rounded-lg overflow-hidden shadow-lg w-64 mx-auto">
+                  <div className="relative border rounded-lg overflow-hidden shadow-lg w-40 sm:w-44 md:w-48 lg:w-64 xl:w-82 mx-auto">
                     <img
                       src={frame.image}
                       alt={`frame-${currentIndexes[seqIdx]}`}

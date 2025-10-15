@@ -26,13 +26,17 @@ interface FrameData {
 // ------------------ Componente ------------------
 const Biomecanica = () => {
   const {
+    setUsingUploadedVideo,
     setCurrentFrameIndex,
+    handleVideoUpload,
     mediaPipePose,
     setRecording,
+    setVideoURL,
     setSegundos,
     setFrames,
     setLado,
 
+    usingUploadedVideo,
     recordingStartRef,
     currentFrameIndex,
     realtimeAngles,
@@ -40,8 +44,9 @@ const Biomecanica = () => {
     recording,
     canvasRef,
     videoRef,
-    frames,
+    videoURL,
     segundos,
+    frames,
     lado,
   } = usePoseView();
 
@@ -80,7 +85,7 @@ const Biomecanica = () => {
     return () => {
       stop?.();
     };
-  }, [recording, lado]);
+  }, [recording, lado, usingUploadedVideo]);
 
   // ------------------ Funciones ------------------
   const startRecording = () => {
@@ -90,16 +95,26 @@ const Biomecanica = () => {
     setRecording(true);
   };
 
+  useEffect(() => {
+    if (videoURL && videoRef.current) {
+      videoRef.current.src = videoURL;
+      videoRef.current.controls = true;
+      videoRef.current.muted = false;
+      videoRef.current.loop = true;
+      videoRef.current.play();
+    }
+  }, [videoURL]);
+
   // ------------------ Render ------------------
   return (
-    <div className="p-6 flex bg-gray-50 min-h-screen">
+    <div className="p-0 sm:p-6 flex bg-gray-50 sm:min-h-screen flex-col sm:flex-row">
       <Link
         to="/election"
         className="absolute h-10 w-10 text-3xl top-5 right-5 text-primary"
       >
         <IoArrowBack />
       </Link>
-      <div className="w-1/3 flex justify-center items-center h-auto">
+      <div className="w-screen sm:w-1/3 flex justify-center items-center h-auto">
         {/* Encabezado */}
         <ProtocoloCiclismo
           data={{
@@ -110,9 +125,9 @@ const Biomecanica = () => {
         />
       </div>
 
-      <div className="w-2/3 flex flex-col items-center justify-center">
+      <div className="w-screen sm:w-2/3 flex flex-col items-center justify-center mt-5 sm:mt-0">
         {(frames.length > 0 || savedSequences.length > 0) && (
-          <div className="flex items-center mb-5 gap-10 text-xs">
+          <div className="flex items-center mb-3 sm:mb-5 gap-10 text-xs">
             <button
               className={`border border-gray-300 rounded-full px-2 py-1 ${
                 recordingVideo
@@ -152,6 +167,34 @@ const Biomecanica = () => {
           }}
         />
 
+        {recordingVideo && (
+          <div className="flex justify-around items-center max-w-md w-full mt-4 mb-4 sm:mb-0">
+            <label className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full text-sm cursor-pointer">
+              🎥 Subir Video
+              <input
+                type="file"
+                accept="video/*"
+                onChange={handleVideoUpload}
+                className="hidden"
+              />
+            </label>
+            <button
+              className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full text-sm cursor-pointer"
+              onClick={() => {
+                if (videoRef.current) {
+                  videoRef.current.pause();
+                  videoRef.current.src = "";
+                  videoRef.current.srcObject = null;
+                }
+                setUsingUploadedVideo(false);
+                setVideoURL(null);
+              }}
+            >
+              ⏺️ Cámara en vivo
+            </button>
+          </div>
+        )}
+
         {/* Visor de frames */}
         {frames.length > 0 && !recording && (
           <FrameView
@@ -166,10 +209,10 @@ const Biomecanica = () => {
         )}
 
         {/* Fila 2 - Botones */}
-        {frames.length > 35 && (
-          <div className="flex justify-center gap-4 mt-2">
+        {frames.length > 10 && (
+          <div className="flex justify-center gap-4 mt-2 mb-2 sm:mb-0">
             <button
-              className="px-3 py-1 rounded-md bg-blue-600 text-white font-medium shadow hover:bg-blue-700 transition"
+              className="px-3 py-1 rounded-full text-sm bg-primary text-white font-medium shadow hover:bg-primary-opacity transition"
               onClick={saveSequence}
             >
               💾 Guardar secuencia

@@ -27,7 +27,7 @@ const Login = () => {
       if (!response.data.error) {
         const { user, token } = response.data.body;
 
-        if (user.usu_kinnx_usa_stabilar.data[0] === 1) {
+        if (user.usu_app_footx_administrador.data[0] === 1) {
           const userData = {
             idtusuarios: user.idtusuarios,
             fk_consultorio: user.fk_consultorio,
@@ -40,6 +40,7 @@ const Login = () => {
             usu_app_footx_administrador:
               user.usu_app_footx_administrador.data[0],
           };
+
           navigate("/election");
           setAuth(userData, token);
         } else {
@@ -131,7 +132,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-2/3  bg-primary text-white py-1 rounded font-semibold hover:bg-red-700 transition disabled:opacity-50"
+              className="w-2/3  bg-primary text-white py-1 rounded font-semibold hover:bg-primary-opacity transition disabled:opacity-50"
             >
               {loading ? "Cargando..." : "Iniciar sesión"}
             </button>

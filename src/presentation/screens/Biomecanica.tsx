@@ -52,7 +52,12 @@ const Biomecanica = () => {
 
   // ---------- Estado para secuencias ----------
   const [savedSequences, setSavedSequences] = useState<
-    { title: string; frames: FrameData[]; currentFrameIndex: number }[]
+    {
+      title: string;
+      frames: FrameData[];
+      currentFrameIndex: number;
+      etapa?: string;
+    }[]
   >([]);
 
   const [config, setConfig] = useState(false);
@@ -105,9 +110,30 @@ const Biomecanica = () => {
     }
   }, [videoURL]);
 
+  const handleImportSequences = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target?.result as string);
+
+        setSavedSequences((prev) => [...prev, ...imported]);
+        console.log("✅ Se cargaron las secuencias:", imported);
+      } catch (err) {
+        console.error("❌ Error al leer el archivo JSON:", err);
+        alert("Archivo inválido");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   // ------------------ Render ------------------
   return (
-    <div className="p-0 sm:p-6 flex bg-gray-50 sm:min-h-screen flex-col sm:flex-row">
+    <div className="p-0 sm:p-2 lg-p-6 flex bg-gray-50 sm:min-h-screen flex-col sm:flex-row">
       <Link
         to="/election"
         className="absolute h-10 w-10 text-3xl top-5 right-5 text-primary"
@@ -126,7 +152,7 @@ const Biomecanica = () => {
       </div>
 
       <div className="w-screen sm:w-2/3 flex flex-col items-center justify-center mt-5 sm:mt-0">
-        {(frames.length > 0 || savedSequences.length > 0) && (
+        {savedSequences.length > 0 && (
           <div className="flex items-center mb-3 sm:mb-5 gap-10 text-xs">
             <button
               className={`border border-gray-300 rounded-full px-2 py-1 ${
@@ -168,8 +194,8 @@ const Biomecanica = () => {
         />
 
         {recordingVideo && (
-          <div className="flex justify-around items-center max-w-md w-full mt-4 mb-4 sm:mb-0">
-            <label className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full text-sm cursor-pointer">
+          <div className="flex flex-col sm:flex-row justify-around items-center max-w-md w-full mt-4 mb-4 sm:mb-0 text-xs gap-2">
+            <label className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full cursor-pointer">
               🎥 Subir Video
               <input
                 type="file"
@@ -179,7 +205,7 @@ const Biomecanica = () => {
               />
             </label>
             <button
-              className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full text-sm cursor-pointer"
+              className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full cursor-pointer"
               onClick={() => {
                 if (videoRef.current) {
                   videoRef.current.pause();
@@ -192,6 +218,15 @@ const Biomecanica = () => {
             >
               ⏺️ Cámara en vivo
             </button>
+            <label className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full cursor-pointer">
+              📂 Importar secuencias
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportSequences}
+                className="hidden"
+              />
+            </label>
           </div>
         )}
 

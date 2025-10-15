@@ -33,18 +33,32 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
     startRecording,
     recordingVideo,
   } = data;
+
   return (
     <div
-      className={`relative w-[340px] lg:w-[448px] h-auto rounded-lg overflow-hidden shadow-lg border border-gray-200 mx-auto ${
+      className={`relative w-[340px] lg:w-[448px] rounded-lg overflow-hidden shadow-lg border border-gray-200 mx-auto ${
         recordingVideo ? "block" : "hidden"
       } mt-5 sm:mt-0`}
+      style={{
+        aspectRatio:
+          videoRef.current?.videoWidth / videoRef.current?.videoHeight || 1.333,
+      }}
     >
       <video
         ref={videoRef}
         autoPlay
         playsInline
         muted
-        className="w-full h-full object-cover"
+        onLoadedMetadata={() => {
+          const video = videoRef.current;
+          const canvas = canvasRef.current;
+          if (video && canvas) {
+            // ⚙️ Igualar dimensiones del canvas al video real
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+          }
+        }}
+        className="w-full h-full object-contain bg-black"
       />
       <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full" />
       <div className="absolute top-2 left-2 bg-white/70 px-3 py-1 rounded text-sm font-medium text-gray-700 shadow-sm">

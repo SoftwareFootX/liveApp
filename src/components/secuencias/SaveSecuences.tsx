@@ -1,16 +1,16 @@
 import { useRef, useState } from "react";
 import {
-  DndContext,
   closestCenter,
   PointerSensor,
-  useSensor,
   useSensors,
+  DndContext,
+  useSensor,
 } from "@dnd-kit/core";
 import {
+  rectSortingStrategy,
   SortableContext,
   useSortable,
   arrayMove,
-  rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -340,6 +340,24 @@ const SaveSecuences = ({ data }: Props) => {
     }, "image/png");
   };
 
+  const handleExportSequences = () => {
+    // Convertimos a string JSON
+
+    console.log("ESTO SE GUARDA: ", sequences);
+
+    const dataStr = JSON.stringify(sequences, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+
+    // Creamos enlace de descarga
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sequences_backup.json";
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <DndContext
       sensors={sensors}
@@ -362,8 +380,10 @@ const SaveSecuences = ({ data }: Props) => {
                   <div className="flex items-center gap-2 w-full  justify-between text-gray-700  my-2">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); // 🔥 evita que el click dispare drag
-                        e.preventDefault(); // 🔥 evita que dnd-kit capture el evento
+                        e.stopPropagation();
+                        e.preventDefault();
+
+                        // 1️⃣ Actualizar el frame seleccionado
                         setFrameSeleccionado({
                           ...frame,
                           title: seq.title,
@@ -404,17 +424,29 @@ const SaveSecuences = ({ data }: Props) => {
                   <div className="flex justify-center items-center gap-3 text-sm text-gray-600 mb-2">
                     <span>Etapa: </span>
                     <select
-                      onChange={(e) => setEtapaSeleccionada(e.target.value)}
+                      value={seq.etapa}
+                      onChange={(e) => {
+                        // 2️⃣ Actualizar solo el objeto actual en 'sequences'
+                        setSequences((prev) =>
+                          prev.map((item, i) =>
+                            i === seqIdx
+                              ? { ...item, etapa: e.target.value } // agrega o reemplaza la etapa
+                              : item
+                          )
+                        );
+
+                        setEtapaSeleccionada(e.target.value);
+                      }}
                     >
                       <option value="---">-------------</option>
                       <option value="Avance inicial">Avance inicial</option>
                       <option value="Avance medio">Avance medio</option>
                       <option value="Impulso inicial">Impulso inicial</option>
-                      <option value="Impulso inicial">Impulso inicial</option>
+                      <option value="Impulso medio">Impulso medio</option>
                       <option value="Arrastre inicial">Arrastre inicial</option>
-                      <option value="Arrastre inicial">Arrastre inicial</option>
+                      <option value="Arrastre medio">Arrastre medio</option>
                       <option value="Recobro inicial">Recobro inicial</option>
-                      <option value="Recobro inicial">Recobro inicial</option>
+                      <option value="Recobro medio">Recobro medio</option>
                     </select>
                   </div>
 
@@ -422,7 +454,7 @@ const SaveSecuences = ({ data }: Props) => {
                     <img
                       src={frame.image}
                       alt={`frame-${currentIndexes[seqIdx]}`}
-                      className="w-full"
+                      className="w-full h-auto object-contain"
                       onLoad={(e) => {
                         const img = e.currentTarget;
                         setImgSize({
@@ -581,6 +613,16 @@ const SaveSecuences = ({ data }: Props) => {
           })}
         </div>
       </SortableContext>
+      <div className="w-full flex justify-center items-center max-w-sm">
+        {sequences.length > 0 && (
+          <button
+            className="px-3 py-1 rounded-full text-sm bg-primary text-white font-medium shadow hover:bg-primary-opacity transition mt-5"
+            onClick={handleExportSequences}
+          >
+            📤 Exportar secuencias
+          </button>
+        )}
+      </div>
     </DndContext>
   );
 };

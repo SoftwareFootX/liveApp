@@ -173,7 +173,7 @@ const FrameView = ({ data }: PropsFrameView) => {
             <img
               src={frames[currentFrameIndex].image}
               alt={`frame-${currentFrameIndex}`}
-              className="w-full"
+              className="w-full h-auto object-contain"
               onLoad={(e) => {
                 const img = e.currentTarget;
                 setImgSize({
@@ -193,6 +193,7 @@ const FrameView = ({ data }: PropsFrameView) => {
                   setFrames((prev: any) =>
                     prev.filter((_: any, idx: any) => idx !== currentFrameIndex)
                   );
+
                   setCurrentFrameIndex((i: any) => (i > 0 ? i - 1 : 0));
                 }}
               >

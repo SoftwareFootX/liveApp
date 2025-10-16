@@ -30,6 +30,7 @@ const Biomecanica = () => {
     setCurrentFrameIndex,
     handleVideoUpload,
     mediaPipePose,
+    setFacingMode,
     setRecording,
     setVideoURL,
     setSegundos,
@@ -40,6 +41,7 @@ const Biomecanica = () => {
     recordingStartRef,
     currentFrameIndex,
     realtimeAngles,
+    facingMode,
     frameIdRef,
     recording,
     canvasRef,
@@ -90,7 +92,7 @@ const Biomecanica = () => {
     return () => {
       stop?.();
     };
-  }, [recording, lado, usingUploadedVideo]);
+  }, [recording, lado, usingUploadedVideo, facingMode]);
 
   // ------------------ Funciones ------------------
   const startRecording = () => {
@@ -179,17 +181,19 @@ const Biomecanica = () => {
         {/* Video en vivo */}
         <CanvasVideo
           data={{
-            videoRef,
-            canvasRef,
-            lado,
-            config,
-            setConfig,
+            startRecording,
+            setFacingMode,
             setSegundos,
-            segundos,
+            setConfig,
+
+            recordingVideo,
             realtimeAngles,
             recording,
-            startRecording,
-            recordingVideo,
+            canvasRef,
+            videoRef,
+            segundos,
+            config,
+            lado,
           }}
         />
 

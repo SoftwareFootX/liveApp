@@ -47,6 +47,9 @@ const usePoseView = () => {
   >([]);
   const [usingUploadedVideo, setUsingUploadedVideo] = useState(false);
   const [videoURL, setVideoURL] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">(
+    "environment"
+  );
 
   // ---------- Funcion para calcular angulos ----------
   const getAngle = (
@@ -323,6 +326,7 @@ const usePoseView = () => {
         },
         width: CAMERA_WIDTH,
         height: CAMERA_HEIGHT,
+        facingMode,
       });
       camera.start();
     }
@@ -348,6 +352,7 @@ const usePoseView = () => {
     recordingStartRef,
     currentFrameIndex,
     realtimeAngles,
+    facingMode,
     frameIdRef,
     canvasRef,
     recording,
@@ -359,8 +364,9 @@ const usePoseView = () => {
 
     setCurrentFrameIndex,
     setUsingUploadedVideo,
-    setRealtimeAngles,
     handleVideoUpload,
+    setRealtimeAngles,
+    setFacingMode,
     mediaPipePose,
     setRecording,
     setVideoURL,

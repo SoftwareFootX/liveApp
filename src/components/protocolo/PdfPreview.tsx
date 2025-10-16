@@ -219,9 +219,9 @@ const PdfPreview = ({
       <div className="w-full flex justify-center items-center mt-4">
         <button
           onClick={handleGenerarPDF}
-          className="bg-primary text-white rounded-full text-md px-20 hover:bg-primary-opacity hover:scale-105 cursor-pointer"
+          className="bg-primary text-white rounded-full text-xs px-20 hover:bg-primary-opacity hover:scale-105 cursor-pointer"
         >
-          Generar PDF
+          GENERAR PDF
         </button>
       </div>
     </div>

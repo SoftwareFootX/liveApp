@@ -1,5 +1,6 @@
 import { BsRecordCircle } from "react-icons/bs";
 import { CiNoWaitingSign, CiTimer } from "react-icons/ci";
+import { IoCameraReverseOutline } from "react-icons/io5";
 
 interface Props {
   videoRef: any;
@@ -13,6 +14,7 @@ interface Props {
   recording: any;
   startRecording: any;
   recordingVideo: any;
+  setFacingMode: (value: any) => void;
 }
 
 interface PropsCanvasVideo {
@@ -32,6 +34,7 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
     recording,
     startRecording,
     recordingVideo,
+    setFacingMode,
   } = data;
 
   return (
@@ -109,6 +112,16 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
         disabled={recording}
       >
         {recording ? <CiNoWaitingSign /> : <BsRecordCircle />}
+      </button>
+      <button
+        onClick={() =>
+          setFacingMode((prev: any) =>
+            prev === "user" ? "environment" : "user"
+          )
+        }
+        className="absolute bottom-2 right-2 text-white text-2xl cursor-pointer hover:scale-120"
+      >
+        <IoCameraReverseOutline />
       </button>
     </div>
   );

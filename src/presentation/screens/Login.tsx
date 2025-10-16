@@ -59,7 +59,7 @@ const Login = () => {
         return;
       }
       if (err.status === 401) {
-        setMessageError("Email y/o contraseña incorrecta");
+        setMessageError("Usuario y/o contraseña incorrecta");
         // console.log("Email y/o contraseña incorrecta: ", error);
         return;
       } else {

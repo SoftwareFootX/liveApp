@@ -34,26 +34,27 @@ interface Props {
 }
 
 const bikeImagesDer = [
-  { src: bici1_der, title: "Avance inicial" },
-  { src: bici2_der, title: "Avance medio" },
-  { src: bici3_der, title: "Impulso inicial" },
-  { src: bici4_der, title: "Impulso medio" },
-  { src: bici5_der, title: "Arrastre inicial" },
-  { src: bici6_der, title: "Arrastre medio" },
-  { src: bici7_der, title: "Recobro inicial" },
-  { src: bici8_der, title: "Recobro medio" },
+  { src: bici1_der, title: "AVANCE INICIAL" },
+  { src: bici2_der, title: "AVANCE MEDIO" },
+  { src: bici3_der, title: "IMPULSO INICIAL" },
+  { src: bici4_der, title: "IMPULSO MEDIO" },
+  { src: bici5_der, title: "ARRASTRE INICIAL" },
+  { src: bici6_der, title: "ARRASTRE MEDIO" },
+  { src: bici7_der, title: "RECOBRO INICIAL" },
+  { src: bici8_der, title: "RECOBRO MEDIO" },
 ];
 
 const bikeImagesIzq = [
-  { src: bici1_izq, title: "Avance inicial" },
-  { src: bici2_izq, title: "Avance medio" },
-  { src: bici3_izq, title: "Impulso inicial" },
-  { src: bici4_izq, title: "Impulso medio" },
-  { src: bici5_izq, title: "Arrastre inicial" },
-  { src: bici6_izq, title: "Arrastre medio" },
-  { src: bici7_izq, title: "Recobro inicial" },
-  { src: bici8_izq, title: "Recobro medio" },
+  { src: bici1_izq, title: "AVANCE INICIAL" },
+  { src: bici2_izq, title: "AVANCE MEDIO" },
+  { src: bici3_izq, title: "IMPULSO INICIAL" },
+  { src: bici4_izq, title: "IMPULSO MEDIO" },
+  { src: bici5_izq, title: "ARRASTRE INICIAL" },
+  { src: bici6_izq, title: "ARRASTRE MEDIO" },
+  { src: bici7_izq, title: "RECOBRO INICIAL" },
+  { src: bici8_izq, title: "RECOBRO MEDIO" },
 ];
+
 const ProtocoloCiclismo = ({ data }: Props) => {
   const { side, setSide, frameSeleccionado } = data;
   const [protocolo, setProtocolo] = useState(true);
@@ -80,13 +81,13 @@ const ProtocoloCiclismo = ({ data }: Props) => {
   const current = bikeImages[currentIndex];
 
   return (
-    <div className="sm:w-full w-84 flex flex-col justify-center items-center mt-5 sm:mt-0">
+    <div className="sm:w-full w-84 flex flex-col justify-center items-center mt-5 sm:mt-0 text-xs">
       {/* 🔹 Navegación protocolo o previsualizacion */}
       <div className="flex justify-between items-center gap-10 text-xs">
         <button
           className={`border border-gray-300 rounded-full px-2 py-1 ${
             protocolo ? "bg-primary text-white" : "bg-gray-200 text-black"
-          }`}
+          } hover:scale-105 cursor-pointer`}
           onClick={() => setProtocolo(true)}
         >
           PROTOCOLO
@@ -94,7 +95,7 @@ const ProtocoloCiclismo = ({ data }: Props) => {
         <button
           className={`border border-gray-300 rounded-full px-2 py-1 ${
             protocolo ? "bg-gray-200 text-black" : "bg-primary text-white"
-          }`}
+          } hover:scale-105 cursor-pointer`}
           onClick={() => setProtocolo(false)}
         >
           PREVISUALIZAR
@@ -103,43 +104,43 @@ const ProtocoloCiclismo = ({ data }: Props) => {
       {protocolo && (
         <div className="flex flex-col items-center">
           {/* 🔹 Navegación entre imágenes */}
-          <div className="flex justify-around items-center p-2 text-gray-700 gap-2">
+          <div className="flex justify-around items-center p-2 text-gray-600 gap-2">
             <button
-              className={`border rounded w-10 flex justify-center items-center py-1 ${
+              className={`border rounded-full flex justify-center items-center px-2 py-1 ${
                 side === "izq"
-                  ? "border-blue-600 bg-blue-100"
-                  : "border-gray-700"
-              }`}
+                  ? "border-primary bg-primary-opacity"
+                  : "border-gray-600"
+              } hover:scale-105 cursor-pointer`}
               onClick={() => handleSideChange("izq")}
             >
-              <img src={icono_bici_izq} className="w-4.5" />
+              <img src={icono_bici_izq} className="w-[18px]" />
             </button>
             <button
-              className="border-gray-700 border rounded"
+              className="border-gray-600 border hover:bg-primary-opacity rounded-full hover:scale-105 cursor-pointer px-2 py-1"
               onClick={handlePrev}
             >
-              <GoArrowLeft size={24} />
+              <GoArrowLeft size={16} />
             </button>
 
-            <span className="border border-gray-700 rounded w-40 flex justify-center items-center">
+            <span className="border border-gray-600 rounded-full w-40 flex justify-center items-center px-2 py-1 ">
               {current.title}
             </span>
 
             <button
-              className="border-gray-700 border rounded"
+              className="border-gray-600 border hover:bg-primary-opacity rounded-full hover:scale-105 cursor-pointer px-2 py-1"
               onClick={handleNext}
             >
-              <GoArrowRight size={24} />
+              <GoArrowRight size={16} />
             </button>
             <button
-              className={`border rounded w-10 flex justify-center items-center py-1 ${
+              className={`border rounded-full flex justify-center items-center px-2 py-1 ${
                 side === "der"
-                  ? "border-blue-600 bg-blue-100"
-                  : "border-gray-700"
-              }`}
+                  ? "border-primary bg-primary-opacity"
+                  : "border-gray-600"
+              } hover:scale-105 cursor-pointer`}
               onClick={() => handleSideChange("der")}
             >
-              <img src={icono_bici_der} className="w-4.5" />
+              <img src={icono_bici_der} className="w-[18px]" />
             </button>
           </div>
 
@@ -147,18 +148,14 @@ const ProtocoloCiclismo = ({ data }: Props) => {
           <img
             src={current.src}
             alt="bici"
-            className="w-80 sm:w-full rounded-xl shadow-md"
+            className="w-60 lg:w-72 2xl:w-84  rounded-xl shadow-md"
           />
 
           {/* 🔹 Indicador opcional */}
-          <div className="text-center text-gray-500 mt-2">
-            {/* {currentIndex + 1} / {bikeImages.length} —{" "}
-        {side === "der" ? "Derecha" : "Izquierda"} */}
+          <div className="text-center text-gray-600 mt-2 text-sm">
             Puntos: Mano, codo, hombro, cadera, rodilla, tobillo, punta del pie.
           </div>
-          <div className="text-center text-gray-500 mt-2">
-            {/* {currentIndex + 1} / {bikeImages.length} —{" "}
-        {side === "der" ? "Derecha" : "Izquierda"} */}
+          <div className="text-center text-gray-600 mt-2 text-sm">
             Angulos: Codo, cadera, rodilla, tobillo.
           </div>
         </div>

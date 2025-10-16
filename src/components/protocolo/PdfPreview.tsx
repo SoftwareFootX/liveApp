@@ -154,7 +154,7 @@ const PdfPreview = ({
           <select
             value={currentPage.modo}
             onChange={(e) => handleModoChange(Number(e.target.value) as 2 | 4)}
-            className="border rounded px-2 py-1"
+            className="border rounded px-2 py-1 cursor-pointer"
           >
             <option value={2}>2 imágenes</option>
             <option value={4}>4 imágenes</option>
@@ -171,7 +171,7 @@ const PdfPreview = ({
                 paginaActual === 0
                   ? "bg-gray-400 text-gray-500 cursor-not-allowed"
                   : "bg-primary text-white hover:bg-primary-opacity"
-              } rounded-full border border-gray-300 px-2 transition`}
+              } rounded-full border border-gray-300 px-2 transition hover:scale-105 cursor-pointer`}
             >
               <span className="text-sm">←</span>
             </button>
@@ -188,7 +188,7 @@ const PdfPreview = ({
                 paginaActual >= paginas.length - 1
                   ? "bg-gray-400 text-gray-500 cursor-not-allowed"
                   : "bg-primary text-white hover:bg-primary-opacity"
-              } rounded-full border border-gray-300 px-2 transition`}
+              } rounded-full border border-gray-300 px-2 transition hover:scale-105 cursor-pointer`}
             >
               <span className="text-sm">→</span>
             </button>
@@ -197,7 +197,7 @@ const PdfPreview = ({
           {/* Botón Nueva Página */}
           <button
             onClick={handleNuevaPagina}
-            className="rounded-full border border-gray-300 px-2 bg-primary text-white hover:bg-primary-opacity transition"
+            className="rounded-full border border-gray-300 px-2 bg-primary text-white hover:bg-primary-opacity transition hover:scale-105 cursor-pointer"
           >
             +
           </button>
@@ -219,7 +219,7 @@ const PdfPreview = ({
       <div className="w-full flex justify-center items-center mt-4">
         <button
           onClick={handleGenerarPDF}
-          className="bg-primary text-white rounded px-20 hover:bg-primary-opacity "
+          className="bg-primary text-white rounded-full text-md px-20 hover:bg-primary-opacity hover:scale-105 cursor-pointer"
         >
           Generar PDF
         </button>
@@ -286,7 +286,7 @@ const Pagina = ({
         {cuadros.map((frame: FrameData | null, idx: number) => (
           <div
             key={idx}
-            className="relative flex justify-center items-center rounded-md flex-col min-h-30 "
+            className="relative flex justify-center items-center rounded-md flex-col min-h-30 hover:scale-105 cursor-pointer"
             style={{
               border: `1px solid ${
                 cuadroSeleccionado === idx ? "#2563eb" : "#d1d5db"

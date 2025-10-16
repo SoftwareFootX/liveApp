@@ -42,7 +42,7 @@ const SortableItem = ({ id, children }: SortableItemProps) => {
       {/* 🔹 Drag handle */}
       <div
         {...listeners}
-        className="cursor-grab p-1 text-gray-500 text-2xl select-none absolute rounded px-2"
+        className="cursor-grab p-1 text-gray-500 text-2xl select-none absolute rounded px-2 hover:scale-105"
       >
         ⠿
       </div>
@@ -343,8 +343,6 @@ const SaveSecuences = ({ data }: Props) => {
   const handleExportSequences = () => {
     // Convertimos a string JSON
 
-    console.log("ESTO SE GUARDA: ", sequences);
-
     const dataStr = JSON.stringify(sequences, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
 
@@ -390,7 +388,7 @@ const SaveSecuences = ({ data }: Props) => {
                           etapa: etapaSeleccionada,
                         });
                       }}
-                      className="rounded-full border px-2 hover:bg-gray-100 z-10"
+                      className="rounded-full border px-2 hover:bg-gray-100 z-10 hover:scale-105 cursor-pointer"
                     >
                       Seleccionar
                     </button>
@@ -399,7 +397,7 @@ const SaveSecuences = ({ data }: Props) => {
                       onMouseUp={() => handlePressEnd(seqIdx)}
                       onMouseLeave={() => handlePressEnd(seqIdx)}
                       disabled={currentIndexes[seqIdx] === 0}
-                      className="rounded-full border px-2 hover:bg-gray-100"
+                      className="rounded-full border px-2 hover:bg-gray-100 hover:scale-105 cursor-pointer"
                     >
                       ←
                     </button>
@@ -415,7 +413,7 @@ const SaveSecuences = ({ data }: Props) => {
                       disabled={
                         currentIndexes[seqIdx] === seq.frames.length - 1
                       }
-                      className="rounded-full border px-2 hover:bg-gray-100"
+                      className="rounded-full border px-2 hover:bg-gray-100 hover:scale-105 cursor-pointer"
                     >
                       →
                     </button>
@@ -424,6 +422,7 @@ const SaveSecuences = ({ data }: Props) => {
                   <div className="flex justify-center items-center gap-3 text-sm text-gray-600 mb-2">
                     <span>Etapa: </span>
                     <select
+                      className="cursor-pointer"
                       value={seq.etapa}
                       onChange={(e) => {
                         // 2️⃣ Actualizar solo el objeto actual en 'sequences'
@@ -450,7 +449,7 @@ const SaveSecuences = ({ data }: Props) => {
                     </select>
                   </div>
 
-                  <div className="relative border rounded-lg overflow-hidden shadow-lg w-40 sm:w-44 md:w-48 lg:w-64 xl:w-82 mx-auto">
+                  <div className="relative border rounded-lg overflow-hidden shadow-lg w-40 sm:w-44 md:w-48 lg:w-54 xl:w-82 mx-auto">
                     <img
                       src={frame.image}
                       alt={`frame-${currentIndexes[seqIdx]}`}
@@ -466,7 +465,7 @@ const SaveSecuences = ({ data }: Props) => {
 
                     <div className="absolute top-2 right-2 flex gap-2 z-10">
                       <button
-                        className="bg-white px-2 py-1 rounded shadow hover:bg-red-400 text-sm"
+                        className="bg-white px-2 py-1 rounded shadow hover:bg-red-400 text-sm hover:scale-120 cursor-pointer"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteFrame(seqIdx);
@@ -477,7 +476,7 @@ const SaveSecuences = ({ data }: Props) => {
                       </button>
 
                       <button
-                        className="bg-white px-2 py-1 rounded shadow hover:bg-blue-500 text-sm"
+                        className="bg-white px-2 py-1 rounded shadow hover:bg-blue-500 text-sm hover:scale-120 cursor-pointer"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSaveFrame(seqIdx);
@@ -616,7 +615,7 @@ const SaveSecuences = ({ data }: Props) => {
       <div className="w-full flex justify-center items-center max-w-sm">
         {sequences.length > 0 && (
           <button
-            className="px-3 py-1 rounded-full text-sm bg-primary text-white font-medium shadow hover:bg-primary-opacity transition mt-5"
+            className="px-3 cursor-pointer hover:scale-105 py-1 rounded-full text-sm bg-primary text-white font-medium shadow hover:bg-primary-opacity transition mt-5"
             onClick={handleExportSequences}
           >
             📤 Exportar secuencias

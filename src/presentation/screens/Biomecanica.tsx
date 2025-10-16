@@ -133,14 +133,14 @@ const Biomecanica = () => {
 
   // ------------------ Render ------------------
   return (
-    <div className="p-0 sm:p-2 lg-p-6 flex bg-gray-50 sm:min-h-screen flex-col sm:flex-row">
+    <div className="p-0 sm:p-2 lg:p-6 flex bg-gray-50 sm:min-h-screen flex-col sm:flex-row justify-between w-screen">
       <Link
         to="/election"
         className="absolute h-10 w-10 text-3xl top-5 right-5 text-primary"
       >
         <IoArrowBack />
       </Link>
-      <div className="w-screen sm:w-1/3 flex justify-center items-center h-auto">
+      <div className="w-screen sm:w-2/5 flex justify-center items-center h-auto">
         {/* Encabezado */}
         <ProtocoloCiclismo
           data={{
@@ -151,15 +151,15 @@ const Biomecanica = () => {
         />
       </div>
 
-      <div className="w-screen sm:w-2/3 flex flex-col items-center justify-center mt-5 sm:mt-0">
+      <div className="w-screen sm:w-3/5 flex flex-col items-center justify-center mt-5 sm:mt-0">
         {savedSequences.length > 0 && (
-          <div className="flex items-center mb-3 sm:mb-5 gap-10 text-xs">
+          <div className="flex items-center mb-3 sm:mb-5 gap-2 text-xs">
             <button
               className={`border border-gray-300 rounded-full px-2 py-1 ${
                 recordingVideo
                   ? "bg-primary text-white"
                   : "bg-gray-200 text-black"
-              }`}
+              } hover:scale-105 cursor-pointer`}
               onClick={() => setRecordingVideo(true)}
             >
               GRABAR
@@ -169,7 +169,7 @@ const Biomecanica = () => {
                 recordingVideo
                   ? "bg-gray-200 text-black"
                   : "bg-primary text-white"
-              }`}
+              } hover:scale-105 cursor-pointer`}
               onClick={() => setRecordingVideo(false)}
             >
               VER SECUENCIAS
@@ -194,9 +194,9 @@ const Biomecanica = () => {
         />
 
         {recordingVideo && (
-          <div className="flex flex-col sm:flex-row justify-around items-center max-w-md w-full mt-4 mb-4 sm:mb-0 text-xs gap-2">
-            <label className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full cursor-pointer">
-              🎥 Subir Video
+          <div className="flex flex-col sm:flex-row justify-center items-center max-w-lg w-full mt-4 mb-4 sm:mb-0 text-xs gap-2">
+            <label className="bg-primary hover:bg-primary-opacity text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105">
+              🎥 CARGAR VIDEO
               <input
                 type="file"
                 accept="video/*"
@@ -205,7 +205,7 @@ const Biomecanica = () => {
               />
             </label>
             <button
-              className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full cursor-pointer"
+              className="bg-primary hover:bg-primary-opacity text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105"
               onClick={() => {
                 if (videoRef.current) {
                   videoRef.current.pause();
@@ -216,10 +216,10 @@ const Biomecanica = () => {
                 setVideoURL(null);
               }}
             >
-              ⏺️ Cámara en vivo
+              ⏺️ VIDEO EN VIVO
             </button>
-            <label className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full cursor-pointer">
-              📂 Importar secuencias
+            <label className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105">
+              📂 IMPORTAR SECUENCIAS
               <input
                 type="file"
                 accept=".json"
@@ -247,10 +247,10 @@ const Biomecanica = () => {
         {frames.length > 10 && (
           <div className="flex justify-center gap-4 mt-2 mb-2 sm:mb-0">
             <button
-              className="px-3 py-1 rounded-full text-sm bg-primary text-white font-medium shadow hover:bg-primary-opacity transition"
+              className="px-3 py-1 rounded-full text-xs bg-primary text-white font-medium shadow hover:bg-primary-opacity transition hover:scale-105"
               onClick={saveSequence}
             >
-              💾 Guardar secuencia
+              💾 GUARDAR SECUENCIA
             </button>
           </div>
         )}

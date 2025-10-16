@@ -147,7 +147,7 @@ const FrameView = ({ data }: PropsFrameView) => {
               onTouchStart={handlePrevPressStart}
               onTouchEnd={handlePrevPressEnd}
               disabled={currentFrameIndex === 0}
-              className="rounded-full border border-gray-300 px-2  hover:bg-gray-100 transition disabled:opacity-40 disabled:hover:bg-transparent"
+              className="hover:scale-105 rounded-full border border-gray-300 px-2  hover:bg-gray-100 transition disabled:opacity-40 disabled:hover:bg-transparent"
             >
               <span className="text-sm">←</span>
             </button>
@@ -163,7 +163,7 @@ const FrameView = ({ data }: PropsFrameView) => {
               onTouchStart={handleNextPressStart}
               onTouchEnd={handleNextPressEnd}
               disabled={currentFrameIndex === frames.length - 1}
-              className="rounded-full border border-gray-300 px-2  hover:bg-gray-100 transition disabled:opacity-40 disabled:hover:bg-transparent"
+              className="hover:scale-105 rounded-full border border-gray-300 px-2  hover:bg-gray-100 transition disabled:opacity-40 disabled:hover:bg-transparent"
             >
               <span className="text-sm">→</span>
             </button>
@@ -186,7 +186,7 @@ const FrameView = ({ data }: PropsFrameView) => {
             {/* Botones sobrepuestos */}
             <div className="absolute top-2 right-2 flex gap-2">
               <button
-                className="bg-white px-2 py-1 rounded shadow hover:bg-red-400 text-sm z-10"
+                className="bg-white px-2 py-1 rounded shadow hover:bg-red-400 text-sm z-10 hover:scale-120"
                 onClick={() => {
                   // Eliminar el frame actual
 
@@ -201,7 +201,7 @@ const FrameView = ({ data }: PropsFrameView) => {
               </button>
 
               <button
-                className="bg-white px-2 py-1 rounded shadow hover:bg-blue-500 text-sm z-10"
+                className="bg-white px-2 py-1 rounded shadow hover:bg-blue-500 text-sm z-10 hover:scale-120"
                 onClick={() => {
                   // Exportar frame con líneas y puntos dibujados
                   const canvas = document.createElement("canvas");

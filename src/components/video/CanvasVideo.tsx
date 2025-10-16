@@ -65,7 +65,7 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
         {lado === "der" ? "Derecho" : "Izquierdo"}
       </div>
       {config ? (
-        <div className="absolute top-2 right-2 bg-white/70 rounded text-sm p-2">
+        <div className="absolute top-2 right-2 bg-white/70 rounded text-sm p-2 cursor-pointer">
           <p className="font-medium mb-1">Segundos:</p>
           <ul className="flex gap-2">
             {[2, 3, 4, 5].map((s) => (
@@ -89,7 +89,7 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
       ) : (
         <CiTimer
           onClick={() => setConfig(true)}
-          className="absolute top-2 right-2 text-white text-2xl"
+          className="absolute top-2 right-2 text-white text-2xl cursor-pointer hover:scale-120"
         />
       )}
       <div className="absolute bottom-1 left-1 bg-white p-1 rounded shadow text-xs opacity-70">
@@ -104,7 +104,7 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
           recording
             ? "text-gray-400 cursor-not-allowed"
             : "text-red-600 hover:text-red-700"
-        }`}
+        } cursor-pointer hover:scale-120`}
         onClick={startRecording}
         disabled={recording}
       >

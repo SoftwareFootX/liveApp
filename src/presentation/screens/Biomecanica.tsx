@@ -66,6 +66,11 @@ const Biomecanica = () => {
   const [frameSeleccionado, setFrameSeleccionado] = useState(null);
   const [recordingVideo, setRecordingVideo] = useState(true);
 
+  const videoMode = "w-[484px] h-[273px]";
+  const liveMode = "w-full h-auto";
+
+  const modeView = usingUploadedVideo ? videoMode : liveMode;
+
   // ---------- Guardar secuencia ----------
   const saveSequence = () => {
     if (frames.length === 0) return;
@@ -188,6 +193,7 @@ const Biomecanica = () => {
 
             recordingVideo,
             realtimeAngles,
+            modeView,
             recording,
             canvasRef,
             videoRef,
@@ -200,7 +206,7 @@ const Biomecanica = () => {
         {recordingVideo && (
           <div className="flex flex-col sm:flex-row justify-center items-center max-w-lg w-full mt-4 mb-4 sm:mb-0 text-xs gap-2">
             <label className="bg-primary hover:bg-primary-opacity text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105">
-              🎥 CARGAR VIDEO
+              🎥 SUBIR VIDEO
               <input
                 type="file"
                 accept="video/*"
@@ -243,6 +249,7 @@ const Biomecanica = () => {
               setCurrentFrameIndex,
               setFrames,
               canvasRef,
+              modeView,
             }}
           />
         )}

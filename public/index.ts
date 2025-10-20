@@ -19,6 +19,9 @@ const bici8_izq = "./Bici8_izq.png";
 const icono_bici_der = "./icono_bici_der.png";
 const icono_bici_izq = "./icono_bici_izq.png";
 const kinnx_logo = "./kinnx_logo.png";
+const logo_stabilar = "./logo-stabilar.png";
+const logo_stabilar_b = "./logo-stabilar-b.png";
+const estabilometro = "./estabilometro-sf.png";
 
 export {
   logo_cop,
@@ -42,4 +45,7 @@ export {
   icono_bici_der,
   icono_bici_izq,
   kinnx_logo,
+  logo_stabilar,
+  logo_stabilar_b,
+  estabilometro,
 };

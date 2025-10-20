@@ -16,7 +16,7 @@ interface User {
   usu_email: string;
   usu_telefono: string;
   usu_celular: string;
-  usu_app_footx_administrador: number;
+  usu_acceso_kinnx_liveapp: number;
 }
 
 interface AuthState {

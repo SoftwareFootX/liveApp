@@ -2,41 +2,62 @@ import { Link } from "react-router-dom";
 import { IoExitOutline } from "react-icons/io5";
 import { useAuthStore } from "../Store/useStore";
 import { useNavigate } from "react-router-dom";
+import { logo_stabilar } from "../../../public";
 
 const ElectionApp = () => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   return (
-    <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center w-full max-w-4xl mx-auto h-screen gap-4 p-4 bg-gray-50 overflow-x-auto">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-gray-100 to-gray-200">
+      {/* Botón de Logout */}
       <button
         onClick={() => {
           logout();
           navigate("/election");
         }}
-        className="absolute text-3xl top-5 right-5 text-primary"
+        className="absolute top-5 right-5 text-primary text-3xl hover:scale-110 transition-transform"
       >
         <IoExitOutline />
       </button>
-      {[
-        { to: "/mediapipe", icon: "🧍🏻‍♂️", label: "MediaPipe" },
-        // { to: "/opencv", icon: "📷", label: "OpenCV" },
-        // { to: "/opencvfromvideo", icon: "🎞️", label: "Open Video" },
-        { to: "/mano", icon: "✋", label: "Mano" },
-        // { to: "/automaticassignment", icon: "⚙️", label: "Auto" },
-        // { to: "/openserver", icon: "⚙️", label: "OpenServer" },
-        { to: "/maratonv", icon: "👟", label: "Vertical" },
-        { to: "/maratonh", icon: "👟", label: "Horizontal" },
-        { to: "/biomecanica", icon: "🚴🏼‍♂️", label: "KinnX" },
-      ].map(({ to, icon, label }) => (
-        <Link
-          key={to}
-          to={to}
-          className="flex items-center gap-2 bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 px-6 py-3 rounded-lg shadow-sm transition w-full sm:w-auto justify-center"
-        >
-          <span className="text-2xl">{icon}</span>
-          <span className="font-medium text-lg">{label}</span>
-        </Link>
-      ))}
+
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">
+        Selecciona una opción
+      </h1>
+
+      <div className="flex flex-wrap justify-center gap-6">
+        {[
+          { to: "/mediapipe", icon: "🧍🏻‍♂️", label: "MediaPipe" },
+          { to: "/mano", icon: "✋", label: "Mano" },
+          { to: "/maratonv", icon: "👟", label: "Vertical" },
+          { to: "/maratonh", icon: "👟", label: "Horizontal" },
+          { to: "/biomecanica", icon: "🚴🏼‍♂️", label: "KinnX" },
+          {
+            to: "/stabilar",
+            icon: logo_stabilar,
+            label: "Stabilar",
+            isImage: true,
+          },
+        ].map(({ to, icon, label, isImage }) => (
+          <Link
+            key={to}
+            to={to}
+            className="relative w-48 h-48 flex flex-col items-center justify-center gap-3 p-4 rounded-2xl
+                   bg-white/30 backdrop-blur-md border border-white/30 shadow-lg
+                   hover:bg-white/50 hover:scale-105 transition-all duration-300"
+          >
+            {isImage ? (
+              <img
+                src={icon}
+                alt={label}
+                className="w-12 h-12 object-contain"
+              />
+            ) : (
+              <span className="text-4xl">{icon}</span>
+            )}
+            <span className="text-lg font-semibold text-gray-800">{label}</span>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };

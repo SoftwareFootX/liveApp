@@ -13,6 +13,7 @@ import { MaratonVertical } from "../screens/MaratonVertical";
 import { Biomecanica } from "../screens/Biomecanica";
 import { useAuthStore } from "../Store/useStore";
 import { Login } from "../screens/Login";
+import { Stabilar } from "../screens/Stabilar";
 
 const AppRoutes = () => {
   const { user } = useAuthStore();
@@ -20,7 +21,7 @@ const AppRoutes = () => {
   return (
     <>
       <Routes>
-        {user?.usu_app_footx_administrador === 1 ? (
+        {user?.usu_acceso_kinnx_liveapp === 1 ? (
           <>
             <Route path="/election" element={<ElectionApp />} />
             <Route path="/mediapipe" element={<MediaPipe />} />
@@ -28,6 +29,7 @@ const AppRoutes = () => {
             <Route path="/mano" element={<Mano />} />
             <Route path="/maratonh" element={<MaratonHorizontal />} />
             <Route path="/maratonv" element={<MaratonVertical />} />
+            <Route path="/stabilar" element={<Stabilar />} />
           </>
         ) : (
           <Route path="/login" element={<Login />} />

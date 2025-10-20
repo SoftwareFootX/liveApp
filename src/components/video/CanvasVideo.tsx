@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { BsRecordCircle } from "react-icons/bs";
 import { CiNoWaitingSign, CiTimer } from "react-icons/ci";
 import { IoCameraReverseOutline } from "react-icons/io5";
@@ -15,6 +16,7 @@ interface Props {
   startRecording: any;
   recordingVideo: any;
   setFacingMode: (value: any) => void;
+  modeView: any;
 }
 
 interface PropsCanvasVideo {
@@ -32,20 +34,26 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
     segundos,
     realtimeAngles,
     recording,
+    modeView,
     startRecording,
     recordingVideo,
     setFacingMode,
   } = data;
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // MEDIDAS WEB CAM
+  // const heightPrueba = 484;
+  // const widthPrueba = 273;
+
   return (
     <div
-      className={`relative w-[340px] lg:w-[448px] rounded-lg overflow-hidden shadow-lg border border-gray-200 mx-auto ${
+      ref={containerRef}
+      className={`relative ${modeView} ${
+        !modeView.includes("w-[") && "max-w-sm"
+      } rounded-lg overflow-hidden shadow-lg border border-gray-200 mx-auto ${
         recordingVideo ? "block" : "hidden"
       } mt-5 sm:mt-0`}
-      style={{
-        aspectRatio:
-          videoRef.current?.videoWidth / videoRef.current?.videoHeight || 1.333,
-      }}
     >
       <video
         ref={videoRef}
@@ -55,18 +63,26 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
         onLoadedMetadata={() => {
           const video = videoRef.current;
           const canvas = canvasRef.current;
-          if (video && canvas) {
-            // ⚙️ Igualar dimensiones del canvas al video real
+          const container = containerRef.current;
+          if (video && canvas && container) {
+            // Igualar tamaño real del canvas al video
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
+
+            // Ajustar contenedor al aspect ratio del video
+            container.style.aspectRatio = (
+              video.videoWidth / video.videoHeight
+            ).toString();
           }
         }}
-        className="w-full h-full object-contain bg-black"
+        className={`${modeView} bg-black`}
       />
-      <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full" />
+      <canvas ref={canvasRef} className={`absolute top-0 left-0 ${modeView}`} />
+
       <div className="absolute top-2 left-2 bg-white/70 px-3 py-1 rounded text-sm font-medium text-gray-700 shadow-sm">
         {lado === "der" ? "Derecho" : "Izquierdo"}
       </div>
+
       {config ? (
         <div className="absolute top-2 right-2 bg-white/70 rounded text-sm p-2 cursor-pointer">
           <p className="font-medium mb-1">Segundos:</p>
@@ -95,6 +111,7 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
           className="absolute top-2 right-2 text-white text-2xl cursor-pointer hover:scale-120"
         />
       )}
+
       <div className="absolute bottom-1 left-1 bg-white p-1 rounded shadow text-xs opacity-70">
         {realtimeAngles.map((a: any) => (
           <div key={a.name}>
@@ -102,6 +119,7 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
           </div>
         ))}
       </div>
+
       <button
         className={`absolute bottom-2 px-3 py-1 rounded-md text-3xl w-full flex items-center justify-center font-medium transition ${
           recording
@@ -113,6 +131,7 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
       >
         {recording ? <CiNoWaitingSign /> : <BsRecordCircle />}
       </button>
+
       <button
         onClick={() =>
           setFacingMode((prev: any) =>

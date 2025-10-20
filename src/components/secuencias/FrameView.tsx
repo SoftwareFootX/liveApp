@@ -7,6 +7,7 @@ interface Props {
   setCurrentFrameIndex: any;
   setFrames: any;
   canvasRef: any;
+  modeView: any;
 }
 
 interface PropsFrameView {
@@ -21,6 +22,7 @@ const FrameView = ({ data }: PropsFrameView) => {
     setFrames,
     canvasRef,
   } = data;
+  const [imgSize, setImgSize] = useState({ width: 640, height: 480 });
 
   const intervalRef = useRef<any | null>(null);
 
@@ -133,12 +135,10 @@ const FrameView = ({ data }: PropsFrameView) => {
   `;
   };
 
-  const [imgSize, setImgSize] = useState({ width: 640, height: 480 });
-
   return (
     <>
       {frames.length > 0 && (
-        <div className="mt-4 max-w-lg">
+        <div className="mt-4">
           <div className="flex items-center justify-center gap-6 text-gray-700 select-none mb-4">
             <button
               onMouseDown={handlePrevPressStart}
@@ -169,7 +169,7 @@ const FrameView = ({ data }: PropsFrameView) => {
             </button>
           </div>
 
-          <div className="relative border rounded-lg overflow-hidden shadow-lg w-78 sm:w-82 mx-auto">
+          <div className="relative border rounded-lg overflow-hidden shadow-lg">
             <img
               src={frames[currentFrameIndex].image}
               alt={`frame-${currentFrameIndex}`}

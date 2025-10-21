@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { kinnx_logo } from "../../../public";
 
 interface FrameData {
   id: number;
@@ -228,7 +227,6 @@ const PdfPreview = ({
   );
 };
 
-// Componente individual de página
 const Pagina = ({
   pagina,
   cuadroSeleccionado,
@@ -239,6 +237,47 @@ const Pagina = ({
 }: any) => {
   const { cuadros, observaciones, modo } = pagina;
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // 🔹 Estados locales persistentes
+  const [headerImage, setHeaderImage] = useState<string | null>(null);
+  const [titulo, setTitulo] = useState("");
+  const [subtitulo, setSubtitulo] = useState("");
+
+  // 🔹 Cargar datos persistentes
+  useEffect(() => {
+    const savedImage = localStorage.getItem("headerImage");
+    const savedTitulo = localStorage.getItem("headerTitulo");
+    const savedSubtitulo = localStorage.getItem("headerSubtitulo");
+
+    if (savedImage) setHeaderImage(savedImage);
+    if (savedTitulo) setTitulo(savedTitulo);
+    if (savedSubtitulo) setSubtitulo(savedSubtitulo);
+  }, []);
+
+  // 🔹 Manejar carga de nueva imagen
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setHeaderImage(result);
+      localStorage.setItem("headerImage", result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // 🔹 Actualizar título y subtítulo persistentes
+  const handleTituloChange = (value: string) => {
+    setTitulo(value);
+    localStorage.setItem("headerTitulo", value);
+  };
+
+  const handleSubtituloChange = (value: string) => {
+    setSubtitulo(value);
+    localStorage.setItem("headerSubtitulo", value);
+  };
 
   return (
     <div
@@ -251,29 +290,96 @@ const Pagina = ({
     >
       {/* Encabezado */}
       <div
-        className="flex items-center justify-around mb-6 w-auto max-w-sm mx-auto"
-        style={{ borderBottom: "2px solid #e5e7eb", paddingBottom: "10px" }}
+        className="flex items-center justify-around w-auto max-w-sm mx-auto mb-4 pb-4"
+        style={{ borderBottom: "2px solid #e5e7eb" }}
       >
+        {/* 🔹 Cuadro para subir imagen */}
         <div
+          className="flex items-center justify-center rounded-lg overflow-hidden cursor-pointer w-1/3"
           style={{
-            borderRadius: "8px",
-            backgroundColor: "#f3f4f6",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "12px",
-            color: "#9ca3af",
+            width: "80px",
+            height: "80px",
+            border: `2px ${headerImage ? "none" : "dashed"} #d1d5db`,
+            backgroundColor: "#f9fafb",
+            position: "relative",
           }}
+          onClick={() => document.getElementById("headerImageInput")?.click()}
         >
-          <img src={kinnx_logo} className="size-15" alt="Logo KinnX" />
+          {headerImage ? (
+            <img
+              src={headerImage}
+              alt="Imagen seleccionada"
+              className="object-cover w-full h-full"
+            />
+          ) : (
+            <span
+              style={{
+                fontSize: "10px",
+                color: "#9ca3af",
+                textAlign: "center",
+                padding: "5px",
+              }}
+            >
+              Subir imagen
+            </span>
+          )}
+          <input
+            id="headerImageInput"
+            type="file"
+            accept="image/png, image/jpeg"
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
         </div>
-        <div className={`text-center ${loading ? "-mt-5" : "mt-0"}`}>
-          <h1 className="font-semibold text-gray-900">
-            Consultorio Kinesiológico
-          </h1>
-          <h2 className="text-xs text-gray-500">
-            Análisis Postural y Funcional
-          </h2>
+
+        {/* 🔹 Título editable */}
+
+        <div
+          className={`text-center flex flex-col w-2/3 z-20 ${
+            loading ? "-mt-5" : "mt-0"
+          }`}
+        >
+          {loading ? (
+            <>
+              <span
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#111827",
+                }}
+              >
+                {titulo || "Consultorio de Kinesiología"}
+              </span>
+              <span
+                style={{
+                  fontSize: "11px",
+                  color: "#6b7280",
+                  marginTop: "4px",
+                }}
+              >
+                {subtitulo || "Analisis biomecánico"}
+              </span>
+            </>
+          ) : (
+            <>
+              <input
+                type="text"
+                value={titulo}
+                onChange={(e) => handleTituloChange(e.target.value)}
+                placeholder="Ingrese título..."
+                className="text-center font-semibold text-gray-900 bg-transparent border-none outline-none w-full text-sm"
+                style={{ fontSize: "14px" }}
+              />
+              <input
+                type="text"
+                value={subtitulo}
+                onChange={(e) => handleSubtituloChange(e.target.value)}
+                placeholder="Ingrese subtítulo..."
+                className="text-center text-xs text-gray-500 bg-transparent border-none outline-none w-full mt-1"
+                style={{ fontSize: "11px" }}
+              />
+            </>
+          )}
         </div>
       </div>
 
@@ -283,7 +389,7 @@ const Pagina = ({
           modo === 2 ? "grid-cols-2" : "grid-cols-2 grid-rows-2"
         } gap-4`}
       >
-        {cuadros.map((frame: FrameData | null, idx: number) => (
+        {cuadros.map((frame: any, idx: number) => (
           <div
             key={idx}
             className="relative flex justify-center items-center rounded-md flex-col min-h-30 hover:scale-105 cursor-pointer"
@@ -358,7 +464,7 @@ const Pagina = ({
           Observaciones:
         </label>
         <textarea
-          className="w-full p-3 rounded-md resize-none"
+          className="w-full p-2 rounded-md resize-none"
           style={{
             border: "1px solid #d1d5db",
             minHeight: "80px",
@@ -367,7 +473,7 @@ const Pagina = ({
           }}
           value={observaciones}
           onChange={(e) =>
-            setPaginas((prev: PaginaData[]) => {
+            setPaginas((prev: any[]) => {
               const nuevas = [...prev];
               nuevas[paginaActual] = {
                 ...nuevas[paginaActual],

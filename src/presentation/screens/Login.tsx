@@ -6,6 +6,7 @@ import axios, { AxiosError } from "axios";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { PiWhatsappLogoThin } from "react-icons/pi";
 import { useAuthStore } from "../Store/useStore";
+import { logo_footx } from "../../../public";
 
 const Login = () => {
   const [form, setForm] = useState({ usu_username: "", usu_password: "" });
@@ -77,6 +78,11 @@ const Login = () => {
       <div className="relative w-full max-w-md">
         <div className="absolute inset-0 bg-white/25 backdrop-blur-2xl rounded-3xl shadow-xl border border-white/30" />
         <div className="relative z-10 p-8 rounded-3xl text-gray-800 bg-primary/15">
+          <img
+            src={logo_footx}
+            alt="logo-footx"
+            className="w-25 sm:w-30 mb-5 mx-auto"
+          />
           <h1 className="text-2xl md:text-3xl font-bold text-center text-primary mb-8 tracking-wide">
             INICIAR SESIÓN
           </h1>

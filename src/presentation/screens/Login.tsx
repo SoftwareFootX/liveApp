@@ -81,7 +81,7 @@ const Login = () => {
           <img
             src={logo_footx}
             alt="logo-footx"
-            className="w-25 sm:w-30 mb-5 mx-auto"
+            className="w-20 sm:w-25 mb-5 mx-auto"
           />
           <h1 className="text-2xl md:text-3xl font-bold text-center text-primary mb-8 tracking-wide">
             INICIAR SESIÓN

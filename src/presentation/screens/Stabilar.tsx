@@ -122,7 +122,7 @@ const Stabilar = () => {
           [23, 25, 27],
         ];
 
-        ctx.fillStyle = "#60DE00"; // Color de los ángulos
+        ctx.fillStyle = "yellow"; // Color de los ángulos
         ctx.font = "bold 16px Arial"; // tamaño, peso y tipo de letra
 
         angulosPostura.forEach(([a, b, c]) => {
@@ -242,8 +242,8 @@ const Stabilar = () => {
         [11, 23, 25],
         [23, 25, 27],
       ];
-      ctx.fillStyle = "#60DE00";
-      ctx.font = "bold 16px Arial";
+      ctx.fillStyle = "yellow";
+      ctx.font = "bold 18px Arial";
       angulosPostura.forEach(([a, b, c]) => {
         const pb = frame.points[b];
         const angle = Math.round(
@@ -476,8 +476,8 @@ const Stabilar = () => {
                           key={`angle-${idx}`}
                           x={pb.x * imgSize.width + 5}
                           y={pb.y * imgSize.height - 5}
-                          fill="#60DE00"
-                          fontSize={18}
+                          fill="yellow"
+                          fontSize={28}
                           fontWeight="bold"
                         >
                           {angle}º

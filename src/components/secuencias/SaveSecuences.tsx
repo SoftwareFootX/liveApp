@@ -126,27 +126,70 @@ const SaveSecuences = ({ data }: Props) => {
     };
   };
 
+  {
+    /* Función para calcular ángulo entre tres puntos */
+  }
   function angleBetweenPoints(p1: any, p2: any, p3: any) {
     const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
     const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
+
     const dot = v1.x * v2.x + v1.y * v2.y;
-    const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
-    const mag2 = Math.sqrt(v2.x ** 2 + v2.y ** 2);
-    if (mag1 === 0 || mag2 === 0) return 0;
-    return Math.acos(dot / (mag1 * mag2));
+    const mag1 = Math.hypot(v1.x, v1.y);
+    const mag2 = Math.hypot(v2.x, v2.y);
+
+    // Ángulo en radianes (0 → 180)
+    let angle = Math.acos(dot / (mag1 * mag2));
+
+    return angle;
   }
 
-  const angleArcPath = ({ p1, p2, p3, radius }: any) => {
-    const angle1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
-    let angle2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
-    if (angle2 < angle1) angle2 += 2 * Math.PI;
-    const x1 = p2.x + radius * Math.cos(angle1);
-    const y1 = p2.y + radius * Math.sin(angle1);
-    const x2 = p2.x + radius * Math.cos(angle2);
-    const y2 = p2.y + radius * Math.sin(angle2);
-    const largeArcFlag = angle2 - angle1 > Math.PI ? 1 : 0;
-    return `M ${p2.x},${p2.y} L ${x1},${y1} A ${radius},${radius} 0 ${largeArcFlag} 1 ${x2},${y2} Z`;
-  };
+  {
+    /* Función para generar el arco SVG del ángulo */
+  }
+  function angleArcPath({
+    p1,
+    p2,
+    p3,
+    radius,
+  }: {
+    p1: { x: number; y: number };
+    p2: { x: number; y: number };
+    p3: { x: number; y: number };
+    radius: number;
+  }) {
+    const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
+    const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
+
+    const angle1 = Math.atan2(v1.y, v1.x);
+    const angle2 = Math.atan2(v2.y, v2.x);
+
+    // Producto cruzado → determina el lado del arco
+    const cross = v1.x * v2.y - v1.y * v2.x;
+    const sweepFlag = cross < 0 ? 0 : 1;
+
+    // Diferencia angular (0 → π)
+    let delta = Math.abs(angle2 - angle1);
+    if (delta > Math.PI) delta = 2 * Math.PI - delta;
+
+    // Si el ángulo supera 180°, limitamos para que no se invierta el relleno
+    const largeArcFlag = 0; // siempre 0 porque solo queremos hasta 180°
+
+    // Puntos inicial y final del arco
+    const start = {
+      x: p2.x + Math.cos(angle1) * radius,
+      y: p2.y + Math.sin(angle1) * radius,
+    };
+    const end = {
+      x: p2.x + Math.cos(angle2) * radius,
+      y: p2.y + Math.sin(angle2) * radius,
+    };
+
+    // Generamos el path SVG cerrado (sector)
+    return `M ${p2.x},${p2.y}
+          L ${start.x},${start.y}
+          A ${radius},${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x},${end.y}
+          Z`;
+  }
 
   // dentro de SaveSecuences (antes del return), pegá:
 
@@ -193,26 +236,26 @@ const SaveSecuences = ({ data }: Props) => {
     const frame = seq.frames[currentIndexes[seqIdx]];
     if (!frame) return;
 
-    // create image element
+    // Crear imagen base
     const img = new Image();
     img.src = frame.image;
-    img.crossOrigin = "anonymous"; // por si acaso
+    img.crossOrigin = "anonymous";
     await new Promise<void>((res, rej) => {
       img.onload = () => res();
       img.onerror = () => rej(new Error("Error cargando la imagen"));
     });
 
-    // canvas tamaño imagen
+    // Crear canvas del tamaño de la imagen
     const canvas = document.createElement("canvas");
     canvas.width = img.width;
     canvas.height = img.height;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // draw base image
+    // Dibujar la imagen base
     ctx.drawImage(img, 0, 0, img.width, img.height);
 
-    // --- líneas ---
+    // --- Dibujar líneas ---
     ctx.strokeStyle = "#DE0000";
     ctx.lineWidth = Math.max(
       2,
@@ -227,7 +270,7 @@ const SaveSecuences = ({ data }: Props) => {
       ctx.stroke();
     });
 
-    // --- puntos ---
+    // --- Dibujar puntos ---
     ctx.fillStyle = "#60DE00";
     frame.points.forEach((p: any) => {
       ctx.beginPath();
@@ -241,54 +284,19 @@ const SaveSecuences = ({ data }: Props) => {
       ctx.fill();
     });
 
-    // --- ángulos calculados dinámicamente (misma lógica que tu SVG) ---
-    // función auxiliar: calcular ángulo en radianes
-    const angleBetweenPoints = (p1: any, p2: any, p3: any) => {
-      const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
-      const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
-      const dot = v1.x * v2.x + v1.y * v2.y;
-      const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
-      const mag2 = Math.sqrt(v2.x ** 2 + v2.y ** 2);
-      if (mag1 === 0 || mag2 === 0) return 0;
-      let val = dot / (mag1 * mag2);
-      // clamp numeric issues
-      val = Math.min(1, Math.max(-1, val));
-      return Math.acos(val);
-    };
-
-    // Para dibujar un arco entre angle1 y angle2
-    const drawAngleArc = (p2: any, p1: any, p3: any, radius: number) => {
-      const angle1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
-      let angle2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
-      // normalizar
-      if (angle2 < angle1) angle2 += 2 * Math.PI;
-      // fill arc
-      ctx.beginPath();
-      ctx.moveTo(p2.x, p2.y);
-      ctx.arc(p2.x, p2.y, radius, angle1, angle2, false);
-      ctx.closePath();
-      ctx.fillStyle = "rgba(255,0,0,0.25)";
-      ctx.fill();
-      // stroke small arc outline
-      ctx.strokeStyle = "red";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(p2.x, p2.y, radius, angle1, angle2, false);
-      ctx.stroke();
-    };
-
-    // recorrer puntos y calcular ángulos (mismo criterio que SVG: puntos con 2 conexiones)
+    // --- Dibujar ángulos ---
     const { points, lines } = frame;
     for (let i = 0; i < points.length; i++) {
       const connected = lines.filter((ln: any) => ln.includes(i));
       if (connected.length < 2) continue;
-      // considerar pares
+
       for (let a = 0; a < connected.length; a++) {
         for (let b = a + 1; b < connected.length; b++) {
           const line1 = connected[a];
           const line2 = connected[b];
           const other1 = line1[0] === i ? line1[1] : line1[0];
           const other2 = line2[0] === i ? line2[1] : line2[0];
+
           const p1 = {
             x: points[other1].x * img.width,
             y: points[other1].y * img.height,
@@ -301,22 +309,50 @@ const SaveSecuences = ({ data }: Props) => {
             x: points[other2].x * img.width,
             y: points[other2].y * img.height,
           };
+
+          // --- Calcular ángulo ---
           const angleRad = angleBetweenPoints(
             points[other1],
             points[i],
             points[other2]
           );
-          // draw arc
-          const radius = Math.min(30, img.width * 0.05);
-          drawAngleArc(p2, p1, p3, radius);
-          // draw text
           const deg = Math.round((angleRad * 180) / Math.PI);
-          const textX = p2.x + radius + 6;
-          const textY = p2.y - 6;
+
+          // --- Dibujar arco ---
+          const radius = Math.min(30, img.width * 0.05);
+          const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
+          const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
+
+          const angle1 = Math.atan2(v1.y, v1.x);
+          const angle2 = Math.atan2(v2.y, v2.x);
+          const cross = v1.x * v2.y - v1.y * v2.x;
+          const anticlockwise = cross < 0;
+
+          ctx.beginPath();
+          ctx.moveTo(p2.x, p2.y);
+          ctx.arc(p2.x, p2.y, radius, angle1, angle2, anticlockwise);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.fillStyle = "rgba(255,0,0,0.3)";
+          ctx.fill();
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = Math.max(
+            2,
+            Math.round(Math.min(img.width, img.height) * 0.004)
+          );
+          ctx.stroke();
+
+          // --- Dibujar texto ---
+          const a1 = angle1;
+          const a2 = angle2;
+          const midAngle = anticlockwise ? (a2 + a1) / 2 : (a1 + a2) / 2;
+          const textRadius = radius * 0.6;
+          const textX = p2.x + textRadius * Math.cos(midAngle);
+          const textY = p2.y + textRadius * Math.sin(midAngle);
+
           ctx.font = `${Math.max(12, Math.round(img.width * 0.02))}px Arial`;
-          ctx.textBaseline = "top";
+          ctx.textBaseline = "middle";
+          ctx.textAlign = "center";
           ctx.fillStyle = "#60DE00";
-          // text outline for readability
           ctx.strokeStyle = "rgba(0,0,0,0.6)";
           ctx.lineWidth = 3;
           ctx.strokeText(`${deg}°`, textX, textY);
@@ -325,7 +361,7 @@ const SaveSecuences = ({ data }: Props) => {
       }
     }
 
-    // Finalmente: descargar
+    // --- Guardar imagen final ---
     canvas.toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
@@ -514,6 +550,7 @@ const SaveSecuences = ({ data }: Props) => {
                         const ch = imgSize.height;
                         const angles: any = [];
 
+                        // Recorremos cada punto y buscamos combinaciones de líneas para formar ángulos
                         points.forEach((p: any, idx: number) => {
                           const connectedLines = lines.filter((line: any) =>
                             line.includes(idx)
@@ -545,6 +582,7 @@ const SaveSecuences = ({ data }: Props) => {
                           }
                         });
 
+                        // Renderizamos arco y texto para cada ángulo
                         return angles.map((a: any, idx: number) => {
                           const p1 = {
                             x: points[a.p1].x * cw,
@@ -559,7 +597,25 @@ const SaveSecuences = ({ data }: Props) => {
                             y: points[a.p3].y * ch,
                           };
                           const radius = Math.min(30, cw * 0.05);
+
                           const path = angleArcPath({ p1, p2, p3, radius });
+
+                          // --- Posición del texto dentro del arco ---
+                          const angle1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+                          const angle2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
+                          let a1 = angle1;
+                          let a2 = angle2;
+                          const cross =
+                            (p3.x - p2.x) * (p1.y - p2.y) -
+                            (p3.y - p2.y) * (p1.x - p2.x);
+                          const anticlockwise = cross > 0;
+                          if (!anticlockwise && a2 < a1) a2 += 2 * Math.PI;
+                          if (anticlockwise && a1 < a2) a1 += 2 * Math.PI;
+                          const midAngle = (a1 + a2) / 2;
+                          const textRadius = radius * 0.6;
+                          const textX = p2.x + textRadius * Math.cos(midAngle);
+                          const textY = p2.y + textRadius * Math.sin(midAngle);
+
                           return (
                             <g key={`angle-${idx}`}>
                               <path
@@ -568,11 +624,13 @@ const SaveSecuences = ({ data }: Props) => {
                                 stroke="red"
                               />
                               <text
-                                x={p2.x + radius + 5}
-                                y={p2.y - 5}
+                                x={textX}
+                                y={textY}
                                 fill="#60DE00"
                                 fontSize="12"
                                 fontWeight="bold"
+                                textAnchor="middle"
+                                alignmentBaseline="middle"
                               >
                                 {Math.round((a.value * 180) / Math.PI)}°
                               </text>

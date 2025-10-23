@@ -7,7 +7,6 @@ interface Props {
   setCurrentFrameIndex: any;
   setFrames: any;
   canvasRef: any;
-  modeView: any;
 }
 
 interface PropsFrameView {
@@ -22,7 +21,13 @@ const FrameView = ({ data }: PropsFrameView) => {
     setFrames,
     canvasRef,
   } = data;
-  const [imgSize, setImgSize] = useState({ width: 640, height: 480 });
+
+  const heightPrueba = 484;
+  const widthPrueba = 273;
+  const [imgSize, setImgSize] = useState({
+    width: widthPrueba,
+    height: heightPrueba,
+  });
 
   const intervalRef = useRef<any | null>(null);
 
@@ -89,51 +94,67 @@ const FrameView = ({ data }: PropsFrameView) => {
   {
     /* Función para calcular ángulo entre tres puntos */
   }
-  function angleBetweenPoints(
-    p1: { x: number; y: number },
-    p2: { x: number; y: number },
-    p3: { x: number; y: number }
-  ) {
+  function angleBetweenPoints(p1: any, p2: any, p3: any) {
     const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
     const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
 
     const dot = v1.x * v2.x + v1.y * v2.y;
-    const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
-    const mag2 = Math.sqrt(v2.x ** 2 + v2.y ** 2);
+    const mag1 = Math.hypot(v1.x, v1.y);
+    const mag2 = Math.hypot(v2.x, v2.y);
 
-    if (mag1 === 0 || mag2 === 0) return 0;
+    // Ángulo en radianes (0 → 180)
+    let angle = Math.acos(dot / (mag1 * mag2));
 
-    const angleRad = Math.acos(dot / (mag1 * mag2));
-    return angleRad;
+    return angle;
   }
 
-  // Función para generar el path SVG de un arco tipo sector
-
-  interface PropsAngles {
-    p1: any;
-    p2: any;
-    p3: any;
+  {
+    /* Función para generar el arco SVG del ángulo */
+  }
+  function angleArcPath({
+    p1,
+    p2,
+    p3,
+    radius,
+  }: {
+    p1: { x: number; y: number };
+    p2: { x: number; y: number };
+    p3: { x: number; y: number };
     radius: number;
+  }) {
+    const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
+    const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
+
+    const angle1 = Math.atan2(v1.y, v1.x);
+    const angle2 = Math.atan2(v2.y, v2.x);
+
+    // Producto cruzado → determina el lado del arco
+    const cross = v1.x * v2.y - v1.y * v2.x;
+    const sweepFlag = cross < 0 ? 0 : 1;
+
+    // Diferencia angular (0 → π)
+    let delta = Math.abs(angle2 - angle1);
+    if (delta > Math.PI) delta = 2 * Math.PI - delta;
+
+    // Si el ángulo supera 180°, limitamos para que no se invierta el relleno
+    const largeArcFlag = 0; // siempre 0 porque solo queremos hasta 180°
+
+    // Puntos inicial y final del arco
+    const start = {
+      x: p2.x + Math.cos(angle1) * radius,
+      y: p2.y + Math.sin(angle1) * radius,
+    };
+    const end = {
+      x: p2.x + Math.cos(angle2) * radius,
+      y: p2.y + Math.sin(angle2) * radius,
+    };
+
+    // Generamos el path SVG cerrado (sector)
+    return `M ${p2.x},${p2.y}
+          L ${start.x},${start.y}
+          A ${radius},${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x},${end.y}
+          Z`;
   }
-  const angleArcPath = ({ p1, p2, p3, radius }: PropsAngles) => {
-    const angle1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
-    let angle2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
-    if (angle2 < angle1) angle2 += 2 * Math.PI;
-
-    const x1 = p2.x + radius * Math.cos(angle1);
-    const y1 = p2.y + radius * Math.sin(angle1);
-    const x2 = p2.x + radius * Math.cos(angle2);
-    const y2 = p2.y + radius * Math.sin(angle2);
-
-    const largeArcFlag = angle2 - angle1 > Math.PI ? 1 : 0;
-
-    return `
-    M ${p2.x},${p2.y} 
-    L ${x1},${y1} 
-    A ${radius},${radius} 0 ${largeArcFlag} 1 ${x2},${y2} 
-    Z
-  `;
-  };
 
   return (
     <>
@@ -314,8 +335,27 @@ const FrameView = ({ data }: PropsFrameView) => {
                   const p1 = { x: points[a.p1].x * cw, y: points[a.p1].y * ch };
                   const p2 = { x: points[a.p2].x * cw, y: points[a.p2].y * ch };
                   const p3 = { x: points[a.p3].x * cw, y: points[a.p3].y * ch };
-                  const radius = Math.min(30, cw * 0.05);
+                  const radius = Math.min(25, cw * 0.1);
                   const path = angleArcPath({ p1, p2, p3, radius });
+
+                  // --- Calcular posición del texto dentro del arco ---
+                  const angle1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+                  const angle2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
+
+                  // Ajuste de sentido del arco (igual que en canvas)
+                  let a1 = angle1;
+                  let a2 = angle2;
+                  const cross =
+                    (p3.x - p2.x) * (p1.y - p2.y) -
+                    (p3.y - p2.y) * (p1.x - p2.x);
+                  const anticlockwise = cross > 0;
+                  if (!anticlockwise && a2 < a1) a2 += 2 * Math.PI;
+                  if (anticlockwise && a1 < a2) a1 += 2 * Math.PI;
+
+                  const midAngle = (a1 + a2) / 2;
+                  const textRadius = radius * 0.6; // posición del texto dentro del arco
+                  const textX = p2.x + textRadius * Math.cos(midAngle);
+                  const textY = p2.y + textRadius * Math.sin(midAngle);
 
                   return (
                     <g key={`angle-${idx}`}>
@@ -326,11 +366,13 @@ const FrameView = ({ data }: PropsFrameView) => {
                         strokeWidth="1"
                       />
                       <text
-                        x={p2.x + radius + 5}
-                        y={p2.y - 5}
+                        x={textX}
+                        y={textY}
                         fill="#60DE00"
                         fontSize="10"
                         fontWeight="bold"
+                        textAnchor="middle"
+                        alignmentBaseline="middle"
                       >
                         {Math.round((a.value * 180) / Math.PI)}°
                       </text>

@@ -57,13 +57,58 @@ const usePoseView = () => {
     B: { x: number; y: number },
     C: { x: number; y: number }
   ) => {
-    const AB = { x: A.x - B.x, y: A.y - B.y };
-    const CB = { x: C.x - B.x, y: C.y - B.y };
+    // Invertimos el eje Y para coincidir con el sistema trigonométrico tradicional
+    const AB = { x: A.x - B.x, y: -(A.y - B.y) };
+    const CB = { x: C.x - B.x, y: -(C.y - B.y) };
+
     const dot = AB.x * CB.x + AB.y * CB.y;
     const magAB = Math.sqrt(AB.x ** 2 + AB.y ** 2);
     const magCB = Math.sqrt(CB.x ** 2 + CB.y ** 2);
     const angleRad = Math.acos(dot / (magAB * magCB));
-    return (angleRad * 180) / Math.PI;
+    const angleDeg = (angleRad * 180) / Math.PI;
+
+    // Mantén tu convención: 180° = articulación estirada
+    return angleDeg;
+  };
+
+  // ---------- Funcion para dibujar el arco del ángulo ----------
+  const drawAngleArc = (
+    ctx: CanvasRenderingContext2D,
+    p1: { x: number; y: number },
+    p2: { x: number; y: number },
+    p3: { x: number; y: number },
+    radius: number
+  ) => {
+    const canvas = ctx.canvas;
+    const x = p2.x * canvas.width;
+    const y = p2.y * canvas.height;
+
+    // --- ángulos en espacio de pantalla (pixels). NO inverter Y aquí ---
+    const a1 = Math.atan2(p1.y * canvas.height - y, p1.x * canvas.width - x);
+    const a2 = Math.atan2(p3.y * canvas.height - y, p3.x * canvas.width - x);
+
+    // --- normalizar delta a (-PI, PI] para obtener el arco más corto ---
+    let delta = a2 - a1;
+    while (delta <= -Math.PI) delta += 2 * Math.PI;
+    while (delta > Math.PI) delta -= 2 * Math.PI;
+
+    // start = a1, end = a1 + delta. anticlockwise = delta < 0 (dibujar en sentido "positivo")
+    const start = a1;
+    const end = a1 + delta;
+    const anticlockwise = delta < 0;
+
+    // Dibujar un sector (arco relleno) que represente el ángulo interior (|delta| <= PI)
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.arc(x, y, radius, start, end, anticlockwise);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(255,0,0,0.25)";
+    ctx.fill();
+
+    // contorno
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+    ctx.stroke();
   };
 
   const getAngleLandmarks = () => {
@@ -146,46 +191,38 @@ const usePoseView = () => {
           const p2 = lm[i2]; // vértice del ángulo
           const p3 = lm[i3];
 
-          // Validar que los puntos existan
           if (!p1 || !p2 || !p3) return;
 
-          // Calcular vectores relativos al vértice
-          let angle1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
-          let angle2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
+          const radius = Math.min(50, canvas.width * 0.2); // radio proporcional al canvas
+          drawAngleArc(ctx, p1, p2, p3, radius);
 
-          if (isNaN(angle1) || isNaN(angle2)) return;
-
-          // Normalizar para que siempre sea sentido horario y menor a 2π
-          if (angle2 < angle1) angle2 += 2 * Math.PI;
-
-          const radius = Math.min(30, canvas.width * 0.05); // radio proporcional al canvas
-
-          ctx.beginPath();
-          ctx.moveTo(p2.x * canvas.width, p2.y * canvas.height); // vértice del ángulo
-          ctx.arc(
-            p2.x * canvas.width,
-            p2.y * canvas.height,
-            radius,
-            angle1,
-            angle2,
-            false
-          );
-          ctx.closePath(); // cierra el camino de vuelta al vértice
-          ctx.fillStyle = "rgba(255,0,0,0.3)"; // rojo semitransparente
-          ctx.fill(); // rellena el sector
-          ctx.strokeStyle = "red"; // opcional, contorno más visible
-          ctx.lineWidth = 2;
-          ctx.stroke();
-
-          // Dibujar valor del ángulo
+          // Calcular el ángulo en grados
           const angle = getAngle(p1, p2, p3).toFixed(0);
-          ctx.fillStyle = "#60DE00";
-          ctx.font = "18px Arial";
-          ctx.fillText(
-            `${angle}°`,
-            p2.x * canvas.width + radius + 5,
-            p2.y * canvas.height - 5
-          );
+
+          // --- Calcular el punto medio del arco ---
+          const x2 = p2.x * canvas.width;
+          const y2 = p2.y * canvas.height;
+          const a1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+          const a2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
+
+          // Normalizar diferencia angular a (-π, π]
+          let delta = a2 - a1;
+          while (delta <= -Math.PI) delta += 2 * Math.PI;
+          while (delta > Math.PI) delta -= 2 * Math.PI;
+
+          const bisector = a1 + delta / 2; // dirección media del arco
+
+          // Posición del texto sobre la bisectriz, un poco hacia adentro
+          const textRadius = radius * 0.6;
+          const textX = x2 + textRadius * Math.cos(bisector);
+          const textY = y2 + textRadius * Math.sin(bisector);
+
+          // --- Dibujar el valor del ángulo ---
+          ctx.fillStyle = "#60DE00"; // blanco para contraste
+          ctx.font = "bold 16px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(`${angle}°`, textX, textY);
         });
 
         // Dentro de pose.onResults y después de calcular los landmarks

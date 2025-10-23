@@ -16,7 +16,6 @@ interface Props {
   startRecording: any;
   recordingVideo: any;
   setFacingMode: (value: any) => void;
-  modeView: any;
 }
 
 interface PropsCanvasVideo {
@@ -34,10 +33,9 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
     segundos,
     realtimeAngles,
     recording,
-    modeView,
     startRecording,
-    recordingVideo,
     setFacingMode,
+    recordingVideo,
   } = data;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,14 +44,14 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
   // const heightPrueba = 484;
   // const widthPrueba = 273;
 
+  const liveMode = "w-full h-auto max-w-md";
+
   return (
     <div
       ref={containerRef}
-      className={`relative ${modeView} ${
-        !modeView.includes("w-[") && "max-w-sm"
-      } rounded-lg overflow-hidden shadow-lg border border-gray-200 mx-auto ${
-        recordingVideo ? "block" : "hidden"
-      } mt-5 sm:mt-0`}
+      className={`relative ${liveMode} ${
+        !recordingVideo ? "hidden" : ""
+      } rounded-lg overflow-hidden shadow-lg border border-gray-200 mx-auto mt-5 sm:mt-0`}
     >
       <video
         ref={videoRef}
@@ -75,9 +73,9 @@ const CanvasVideo = ({ data }: PropsCanvasVideo) => {
             ).toString();
           }
         }}
-        className={`${modeView} bg-black`}
+        className={`${liveMode} bg-black`}
       />
-      <canvas ref={canvasRef} className={`absolute top-0 left-0 ${modeView}`} />
+      <canvas ref={canvasRef} className={`absolute top-0 left-0 ${liveMode}`} />
 
       <div className="absolute top-2 left-2 bg-white/70 px-3 py-1 rounded text-sm font-medium text-gray-700 shadow-sm">
         {lado === "der" ? "Derecho" : "Izquierdo"}

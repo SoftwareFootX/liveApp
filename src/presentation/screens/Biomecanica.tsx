@@ -26,13 +26,13 @@ interface FrameData {
 // ------------------ Componente ------------------
 const Biomecanica = () => {
   const {
-    setUsingUploadedVideo,
+    // setUsingUploadedVideo,
     setCurrentFrameIndex,
-    handleVideoUpload,
+    // handleVideoUpload,
     mediaPipePose,
     setFacingMode,
     setRecording,
-    setVideoURL,
+    // setVideoURL,
     setSegundos,
     setFrames,
     setLado,
@@ -65,11 +65,6 @@ const Biomecanica = () => {
   const [config, setConfig] = useState(false);
   const [frameSeleccionado, setFrameSeleccionado] = useState(null);
   const [recordingVideo, setRecordingVideo] = useState(true);
-
-  const videoMode = "w-[484px] h-[273px]";
-  const liveMode = "w-full h-auto";
-
-  const modeView = usingUploadedVideo ? videoMode : liveMode;
 
   // ---------- Guardar secuencia ----------
   const saveSequence = () => {
@@ -193,7 +188,6 @@ const Biomecanica = () => {
 
             recordingVideo,
             realtimeAngles,
-            modeView,
             recording,
             canvasRef,
             videoRef,
@@ -205,7 +199,7 @@ const Biomecanica = () => {
 
         {recordingVideo && (
           <div className="flex flex-col sm:flex-row justify-center items-center max-w-lg w-full mt-4 mb-4 sm:mb-0 text-xs gap-2">
-            <label className="bg-primary hover:bg-primary-opacity text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105">
+            {/* <label className="bg-primary hover:bg-primary-opacity text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105">
               🎥 SUBIR VIDEO
               <input
                 type="file"
@@ -227,7 +221,7 @@ const Biomecanica = () => {
               }}
             >
               ⏺️ VIDEO EN VIVO
-            </button>
+            </button> */}
             <label className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105">
               📂 IMPORTAR SECUENCIAS
               <input
@@ -249,7 +243,6 @@ const Biomecanica = () => {
               setCurrentFrameIndex,
               setFrames,
               canvasRef,
-              modeView,
             }}
           />
         )}

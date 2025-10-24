@@ -140,7 +140,7 @@ const PdfPreview = ({
       });
     }
 
-    pdf.save("kinnk.pdf");
+    pdf.save("kinnX.pdf");
     setLoading(false);
   };
 
@@ -392,7 +392,7 @@ const Pagina = ({
         {cuadros.map((frame: any, idx: number) => (
           <div
             key={idx}
-            className="relative flex justify-center items-center rounded-md flex-col min-h-30 hover:scale-105 cursor-pointer"
+            className="relative flex justify-center items-center rounded-md flex-col min-h-25 hover:scale-105 cursor-pointer"
             style={{
               border: `1px solid ${
                 cuadroSeleccionado === idx ? "#2563eb" : "#d1d5db"
@@ -492,14 +492,15 @@ const Pagina = ({
 const FrameCanvas = ({ frame }: { frame: FrameData }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const calcularAngulo = (p1: any, p2: any, p3: any) => {
+  // Calcula ángulo en radianes
+  const angleBetweenPoints = (p1: any, p2: any, p3: any) => {
     const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
     const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
     const dot = v1.x * v2.x + v1.y * v2.y;
     const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
     const mag2 = Math.sqrt(v2.x ** 2 + v2.y ** 2);
     const angle = Math.acos(dot / (mag1 * mag2));
-    return (angle * 180) / Math.PI;
+    return angle; // radianes
   };
 
   useEffect(() => {
@@ -514,6 +515,7 @@ const FrameCanvas = ({ frame }: { frame: FrameData }) => {
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0, img.width, img.height);
 
+      // --- Dibujar líneas ---
       ctx.strokeStyle = "red";
       ctx.lineWidth = 2;
       frame.lines.forEach(([a, b]) => {
@@ -525,38 +527,82 @@ const FrameCanvas = ({ frame }: { frame: FrameData }) => {
         ctx.stroke();
       });
 
-      ctx.fillStyle = "yellow";
-      frame.points.forEach((p) => {
-        ctx.beginPath();
-        ctx.arc(p.x * img.width, p.y * img.height, 4, 0, Math.PI * 2);
-        ctx.fill();
-      });
+      // --- Dibujar arcos y ángulos ---
+      frame.points.forEach((p, i) => {
+        const connectedLines = frame.lines.filter(
+          ([a, b]) => a === i || b === i
+        );
+        if (connectedLines.length === 2) {
+          const other1 =
+            connectedLines[0][0] === i
+              ? connectedLines[0][1]
+              : connectedLines[0][0];
+          const other2 =
+            connectedLines[1][0] === i
+              ? connectedLines[1][1]
+              : connectedLines[1][0];
 
-      ctx.fillStyle = "white";
-      ctx.font = "bold 14px Arial";
-      ctx.textBaseline = "middle";
-      ctx.textAlign = "left";
+          const p1 = {
+            x: frame.points[other1].x * img.width,
+            y: frame.points[other1].y * img.height,
+          };
+          const p2 = { x: p.x * img.width, y: p.y * img.height };
+          const p3 = {
+            x: frame.points[other2].x * img.width,
+            y: frame.points[other2].y * img.height,
+          };
 
-      for (let i = 0; i < frame.points.length; i++) {
-        const conexiones = frame.lines.filter(([a, b]) => a === i || b === i);
-        if (conexiones.length === 2) {
-          const otro1 =
-            conexiones[0][0] === i ? conexiones[0][1] : conexiones[0][0];
-          const otro2 =
-            conexiones[1][0] === i ? conexiones[1][1] : conexiones[1][0];
-          const angulo = calcularAngulo(
-            frame.points[otro1],
-            frame.points[i],
-            frame.points[otro2]
+          const angle = angleBetweenPoints(p1, p2, p3);
+          const radius = Math.min(40, img.width * 1);
+
+          const a1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+          const a2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
+
+          // Determinar sentido del arco
+          let startAngle = a1;
+          let endAngle = a2;
+          const cross =
+            (p3.x - p2.x) * (p1.y - p2.y) - (p3.y - p2.y) * (p1.x - p2.x);
+          const anticlockwise = cross > 0;
+          if (!anticlockwise && endAngle < startAngle) endAngle += 2 * Math.PI;
+          if (anticlockwise && startAngle < endAngle) startAngle += 2 * Math.PI;
+
+          // --- Dibuja arco ---
+          ctx.beginPath();
+          ctx.strokeStyle = "rgba(255,0,0,0.8)";
+          ctx.fillStyle = "rgba(255,0,0,0.3)";
+          ctx.lineWidth = 1.5;
+          ctx.moveTo(p2.x, p2.y);
+          ctx.arc(p2.x, p2.y, radius, startAngle, endAngle, anticlockwise);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.fill();
+          ctx.stroke();
+
+          // --- Calcular posición del texto dentro del arco ---
+          const midAngle = (startAngle + endAngle) / 2;
+          const textRadius = radius * 0.6;
+          const textX = p2.x + textRadius * Math.cos(midAngle);
+          const textY = p2.y + textRadius * Math.sin(midAngle);
+
+          ctx.font = "bold 14px Arial";
+          ctx.fillStyle = "#60DE00";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(
+            `${((angle * 180) / Math.PI).toFixed(1)}°`,
+            textX,
+            textY
           );
-          const p = frame.points[i];
-          const text = `${angulo.toFixed(1)}°`;
-          ctx.strokeStyle = "black";
-          ctx.lineWidth = 3;
-          ctx.strokeText(text, p.x * img.width + 5, p.y * img.height);
-          ctx.fillText(text, p.x * img.width + 5, p.y * img.height);
+
+          // --- Dibujar puntos ---
+          ctx.fillStyle = "yellow";
+          frame.points.forEach((p) => {
+            ctx.beginPath();
+            ctx.arc(p.x * img.width, p.y * img.height, 4, 0, Math.PI * 2);
+            ctx.fill();
+          });
         }
-      }
+      });
     };
   }, [frame]);
 

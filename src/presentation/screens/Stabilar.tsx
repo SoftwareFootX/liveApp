@@ -148,6 +148,9 @@ const Stabilar = () => {
       }
     });
 
+    const CAMERA_WIDTH = 1280 * 0.7;
+    const CAMERA_HEIGHT = 720 * 0.7;
+
     let camera: Camera | null = null;
     const video = videoRef.current;
     if (!video) return;
@@ -155,8 +158,8 @@ const Stabilar = () => {
       onFrame: async () => {
         await pose.send({ image: video });
       },
-      width: 640,
-      height: 480,
+      width: CAMERA_WIDTH,
+      height: CAMERA_HEIGHT,
       facingMode,
     });
 

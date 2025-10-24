@@ -24,27 +24,24 @@ interface PropsCanvasVideo {
 
 const CanvasVideo = ({ data }: PropsCanvasVideo) => {
   const {
-    videoRef,
-    canvasRef,
-    lado,
-    config,
-    setConfig,
-    setSegundos,
-    segundos,
-    realtimeAngles,
-    recording,
-    startRecording,
     setFacingMode,
+
     recordingVideo,
+    realtimeAngles,
+    startRecording,
+    setSegundos,
+    canvasRef,
+    recording,
+    setConfig,
+    videoRef,
+    segundos,
+    config,
+    lado,
   } = data;
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // MEDIDAS WEB CAM
-  // const heightPrueba = 484;
-  // const widthPrueba = 273;
-
-  const liveMode = "w-full h-auto max-w-md";
+  const liveMode = "w-92 md:w-full h-auto max-w-2xl";
 
   return (
     <div

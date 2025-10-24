@@ -22,11 +22,9 @@ const FrameView = ({ data }: PropsFrameView) => {
     canvasRef,
   } = data;
 
-  const heightPrueba = 484;
-  const widthPrueba = 273;
   const [imgSize, setImgSize] = useState({
-    width: widthPrueba,
-    height: heightPrueba,
+    width: 1280,
+    height: 720,
   });
 
   const intervalRef = useRef<any | null>(null);
@@ -194,7 +192,7 @@ const FrameView = ({ data }: PropsFrameView) => {
             <img
               src={frames[currentFrameIndex].image}
               alt={`frame-${currentFrameIndex}`}
-              className="w-full h-auto object-contain"
+              className="w-92 md:w-full h-auto object-contain max-w-2xl"
               onLoad={(e) => {
                 const img = e.currentTarget;
                 setImgSize({
@@ -226,8 +224,8 @@ const FrameView = ({ data }: PropsFrameView) => {
                 onClick={() => {
                   // Exportar frame con líneas y puntos dibujados
                   const canvas = document.createElement("canvas");
-                  canvas.width = canvasRef.current?.width || 640;
-                  canvas.height = canvasRef.current?.height || 480;
+                  canvas.width = canvasRef.current?.width || 1280;
+                  canvas.height = canvasRef.current?.height || 720;
                   const ctx = canvas.getContext("2d");
                   if (!ctx) return;
 

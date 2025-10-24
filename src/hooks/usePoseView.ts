@@ -21,11 +21,10 @@ export type Recording = FrameData[];
 
 const usePoseView = () => {
   // valores recomendados
-  const scale = 1; // 90%, cambiar por 0.8, 0.7 etc.
-  const CAMERA_WIDTH = Math.round(640 * scale);
-  const CAMERA_HEIGHT = Math.round(480 * scale);
-  const SAVE_WIDTH = 320; // tamaño al que guardás (reduce memoria)
-  const SAVE_HEIGHT = 240;
+  const CAMERA_WIDTH = 1280 * 0.7;
+  const CAMERA_HEIGHT = 720 * 0.7;
+  const SAVE_WIDTH = 1280 * 0.4; // tamaño al que guardás (reduce memoria)
+  const SAVE_HEIGHT = 720 * 0.4;
   const JPEG_QUALITY = 1.0; // 0.0 - 1.0, menos => menos peso
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -107,7 +106,7 @@ const usePoseView = () => {
 
     // contorno
     ctx.strokeStyle = "red";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.stroke();
   };
 
@@ -173,7 +172,7 @@ const usePoseView = () => {
         // --- Dibujo de puntos y líneas ---
         ctx.fillStyle = "#60DE00";
         ctx.strokeStyle = "#DE0000";
-        ctx.lineWidth = 3;
+        ctx.lineWidth = usingUploadedVideo ? 2 : 4;
 
         lines.forEach(([a, b]) => {
           const pa = lm[a],
@@ -193,7 +192,10 @@ const usePoseView = () => {
 
           if (!p1 || !p2 || !p3) return;
 
-          const radius = Math.min(50, canvas.width * 0.2); // radio proporcional al canvas
+          const radius = Math.min(
+            usingUploadedVideo ? 30 : 70,
+            canvas.width * 0.2
+          ); // radio proporcional al canvas
           drawAngleArc(ctx, p1, p2, p3, radius);
 
           // Calcular el ángulo en grados
@@ -219,7 +221,7 @@ const usePoseView = () => {
 
           // --- Dibujar el valor del ángulo ---
           ctx.fillStyle = "#60DE00"; // blanco para contraste
-          ctx.font = "bold 16px Arial";
+          ctx.font = `bold ${usingUploadedVideo ? "16px" : "26px"} Arial`;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillText(`${angle}°`, textX, textY);

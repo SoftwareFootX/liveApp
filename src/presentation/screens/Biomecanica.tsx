@@ -26,13 +26,13 @@ interface FrameData {
 // ------------------ Componente ------------------
 const Biomecanica = () => {
   const {
-    // setUsingUploadedVideo,
+    setUsingUploadedVideo,
     setCurrentFrameIndex,
-    // handleVideoUpload,
+    handleVideoUpload,
     mediaPipePose,
     setFacingMode,
     setRecording,
-    // setVideoURL,
+    setVideoURL,
     setSegundos,
     setFrames,
     setLado,
@@ -133,6 +133,8 @@ const Biomecanica = () => {
     reader.readAsText(file);
   };
 
+  const isMobile = window.innerWidth <= 639;
+
   // ------------------ Render ------------------
   return (
     <div className="p-0 sm:p-2 lg:p-6 flex bg-gray-50 sm:min-h-screen flex-col sm:flex-row justify-between w-screen">
@@ -164,7 +166,7 @@ const Biomecanica = () => {
               } hover:scale-105 cursor-pointer`}
               onClick={() => setRecordingVideo(true)}
             >
-              GRABAR
+              GRABAR SECUENCIAS
             </button>
             <button
               className={`border border-gray-300 rounded-full px-2 py-1 ${
@@ -179,6 +181,12 @@ const Biomecanica = () => {
           </div>
         )}
         {/* Video en vivo */}
+        {isMobile && videoURL === null && recordingVideo && (
+          <span className="text-red-700 text-sm border border-red-700 rounded-full py-1 px-2 mt-2">
+            Por favor, cambie la orientación de su dispositivo.
+          </span>
+        )}
+
         <CanvasVideo
           data={{
             startRecording,
@@ -199,29 +207,32 @@ const Biomecanica = () => {
 
         {recordingVideo && (
           <div className="flex flex-col sm:flex-row justify-center items-center max-w-lg w-full mt-4 mb-4 sm:mb-0 text-xs gap-2">
-            {/* <label className="bg-primary hover:bg-primary-opacity text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105">
-              🎥 SUBIR VIDEO
-              <input
-                type="file"
-                accept="video/*"
-                onChange={handleVideoUpload}
-                className="hidden"
-              />
-            </label>
-            <button
-              className="bg-primary hover:bg-primary-opacity text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105"
-              onClick={() => {
-                if (videoRef.current) {
-                  videoRef.current.pause();
-                  videoRef.current.src = "";
-                  videoRef.current.srcObject = null;
-                }
-                setUsingUploadedVideo(false);
-                setVideoURL(null);
-              }}
-            >
-              ⏺️ VIDEO EN VIVO
-            </button> */}
+            {videoURL === null ? (
+              <label className="bg-primary hover:bg-primary-opacity text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105">
+                🎞️ SUBIR VIDEO
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoUpload}
+                  className="hidden"
+                />
+              </label>
+            ) : (
+              <button
+                className="bg-primary hover:bg-primary-opacity text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105"
+                onClick={() => {
+                  if (videoRef.current) {
+                    videoRef.current.pause();
+                    videoRef.current.src = "";
+                    videoRef.current.srcObject = null;
+                  }
+                  setUsingUploadedVideo(false);
+                  setVideoURL(null);
+                }}
+              >
+                🎥 REGRESAR AL VIDEO EN VIVO
+              </button>
+            )}
             <label className="bg-primary hover:bg-primary-opacity  text-white px-4 py-1 rounded-full cursor-pointer hover:scale-105">
               📂 IMPORTAR SECUENCIAS
               <input

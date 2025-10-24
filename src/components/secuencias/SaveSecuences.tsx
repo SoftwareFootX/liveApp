@@ -411,7 +411,7 @@ const SaveSecuences = ({ data }: Props) => {
               <SortableItem key={seq.id} id={seq.id}>
                 <div className="p-2 border rounded-lg shadow bg-white flex flex-col items-center">
                   <span className="text-gray-500 text-sm">{seq.title}</span>
-                  <div className="flex items-center gap-2 w-full  justify-between text-gray-700  my-2">
+                  <div className="flex justify-center items-center gap-2 w-full text-gray-700  my-2 text-sm">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -424,35 +424,37 @@ const SaveSecuences = ({ data }: Props) => {
                           etapa: etapaSeleccionada,
                         });
                       }}
-                      className="rounded-full border px-2 hover:bg-gray-100 z-10 hover:scale-105 cursor-pointer"
+                      className="rounded-full border px-2 hover:bg-gray-100 z-10 hover:scale-105 cursor-pointer "
                     >
                       Seleccionar
                     </button>
-                    <button
-                      onMouseDown={() => handlePressStart(seqIdx, "prev")}
-                      onMouseUp={() => handlePressEnd(seqIdx)}
-                      onMouseLeave={() => handlePressEnd(seqIdx)}
-                      disabled={currentIndexes[seqIdx] === 0}
-                      className="rounded-full border px-2 hover:bg-gray-100 hover:scale-105 cursor-pointer"
-                    >
-                      ←
-                    </button>
+                    <div className="flex justify-center items-center gap-2">
+                      <button
+                        onMouseDown={() => handlePressStart(seqIdx, "prev")}
+                        onMouseUp={() => handlePressEnd(seqIdx)}
+                        onMouseLeave={() => handlePressEnd(seqIdx)}
+                        disabled={currentIndexes[seqIdx] === 0}
+                        className="rounded-full border px-2 hover:bg-gray-100 hover:scale-105 cursor-pointer"
+                      >
+                        ←
+                      </button>
 
-                    <span className="text-sm font-medium">
-                      {currentIndexes[seqIdx] + 1} / {seq.frames.length}
-                    </span>
+                      <span className="text-xs font-medium">
+                        {currentIndexes[seqIdx] + 1} / {seq.frames.length}
+                      </span>
 
-                    <button
-                      onMouseDown={() => handlePressStart(seqIdx, "next")}
-                      onMouseUp={() => handlePressEnd(seqIdx)}
-                      onMouseLeave={() => handlePressEnd(seqIdx)}
-                      disabled={
-                        currentIndexes[seqIdx] === seq.frames.length - 1
-                      }
-                      className="rounded-full border px-2 hover:bg-gray-100 hover:scale-105 cursor-pointer"
-                    >
-                      →
-                    </button>
+                      <button
+                        onMouseDown={() => handlePressStart(seqIdx, "next")}
+                        onMouseUp={() => handlePressEnd(seqIdx)}
+                        onMouseLeave={() => handlePressEnd(seqIdx)}
+                        disabled={
+                          currentIndexes[seqIdx] === seq.frames.length - 1
+                        }
+                        className="rounded-full border px-2 hover:bg-gray-100 hover:scale-105 cursor-pointer"
+                      >
+                        →
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex justify-center items-center gap-3 text-sm text-gray-600 mb-2">
@@ -485,7 +487,7 @@ const SaveSecuences = ({ data }: Props) => {
                     </select>
                   </div>
 
-                  <div className="relative border rounded-lg overflow-hidden shadow-lg w-40 sm:w-44 md:w-48 lg:w-54 xl:w-82 mx-auto">
+                  <div className="relative border rounded-lg overflow-hidden shadow-lg w-56 sm:w-44 md:w-48 lg:w-54 xl:w-82 mx-auto">
                     <img
                       src={frame.image}
                       alt={`frame-${currentIndexes[seqIdx]}`}

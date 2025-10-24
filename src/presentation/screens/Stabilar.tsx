@@ -25,7 +25,7 @@ const calculateAngle = (
   const magCB = Math.hypot(cb.x, cb.y);
   const angleRad = Math.acos(dot / (magAB * magCB));
   const angleDeg = (angleRad * 180) / Math.PI;
-  return Math.abs(180 - angleDeg);
+  return Math.abs(angleDeg);
 };
 
 // ---------- Componente ----------
@@ -122,8 +122,8 @@ const Stabilar = () => {
           [23, 25, 27],
         ];
 
-        ctx.fillStyle = "yellow"; // Color de los ángulos
-        ctx.font = "bold 16px Arial"; // tamaño, peso y tipo de letra
+        ctx.fillStyle = "red"; // Color de los ángulos
+        ctx.font = "bold 22px Arial"; // tamaño, peso y tipo de letra
 
         angulosPostura.forEach(([a, b, c]) => {
           const pa = lm[a];
@@ -245,8 +245,8 @@ const Stabilar = () => {
         [11, 23, 25],
         [23, 25, 27],
       ];
-      ctx.fillStyle = "yellow";
-      ctx.font = "bold 18px Arial";
+      ctx.fillStyle = "red";
+      ctx.font = "bold 22px Arial";
       angulosPostura.forEach(([a, b, c]) => {
         const pb = frame.points[b];
         const angle = Math.round(
@@ -479,8 +479,8 @@ const Stabilar = () => {
                           key={`angle-${idx}`}
                           x={pb.x * imgSize.width + 5}
                           y={pb.y * imgSize.height - 5}
-                          fill="yellow"
-                          fontSize={28}
+                          fill="red"
+                          fontSize={36}
                           fontWeight="bold"
                         >
                           {angle}º

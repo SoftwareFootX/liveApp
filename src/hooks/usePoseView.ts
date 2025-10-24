@@ -106,7 +106,7 @@ const usePoseView = () => {
 
     // contorno
     ctx.strokeStyle = "red";
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2;
     ctx.stroke();
   };
 
@@ -172,7 +172,7 @@ const usePoseView = () => {
         // --- Dibujo de puntos y líneas ---
         ctx.fillStyle = "#60DE00";
         ctx.strokeStyle = "#DE0000";
-        ctx.lineWidth = usingUploadedVideo ? 2 : 4;
+        ctx.lineWidth = 2;
 
         lines.forEach(([a, b]) => {
           const pa = lm[a],
@@ -193,7 +193,7 @@ const usePoseView = () => {
           if (!p1 || !p2 || !p3) return;
 
           const radius = Math.min(
-            usingUploadedVideo ? 30 : 70,
+            usingUploadedVideo ? 30 : 60,
             canvas.width * 0.2
           ); // radio proporcional al canvas
           drawAngleArc(ctx, p1, p2, p3, radius);
@@ -221,7 +221,7 @@ const usePoseView = () => {
 
           // --- Dibujar el valor del ángulo ---
           ctx.fillStyle = "#60DE00"; // blanco para contraste
-          ctx.font = `bold ${usingUploadedVideo ? "16px" : "26px"} Arial`;
+          ctx.font = `bold ${usingUploadedVideo ? "12px" : "20px"} Arial`;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillText(`${angle}°`, textX, textY);
